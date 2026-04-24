@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://elencostoriconrericevuta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipodati.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://elencostoriconrericevuta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipodati.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiRicercaErogatore.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.2</xs:documentation>
+	</xs:annotation>
+	<xs:element name="ElencoStoricoNreRicevuta">
+		<xs:annotation>
+			<xs:documentation>Elemento base della ricevuta</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="nre" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero ricetta elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ElencoStoricoNre" type="td:elencoStoricoNreType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Elenco dei dettagli sintetici della ricerca erogato</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codEsitoElencoStoricoNre" type="td:codEsitoType">
+					<xs:annotation>
+						<xs:documentation>Codice dell'esito della ricerca</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ElencoErroriRicette" type="td:elencoErroriRicetteType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di ErroreRicetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ElencoComunicazioni" type="td:elencoComunicazioniType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di Comunicazioni di servizio</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

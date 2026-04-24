@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:ricevutainviosegnalazionens="http://inviosegnalazionericevuta.xsd.dem.sanita.finanze.it" xmlns:richiestainviosegnalazionens="http://inviosegnalazionerichiesta.xsd.dem.sanita.finanze.it" xmlns:ricevutaricercasegnalazionins="http://ricercasegnalazioniricevuta.xsd.dem.sanita.finanze.it" xmlns:richiestaricercasegnalazionins="http://ricercasegnalazionirichiesta.xsd.dem.sanita.finanze.it" xmlns:ricevutainvioerogatodiffns="http://invioerogatodiffricevuta.xsd.dem.sanita.finanze.it" xmlns:richiestainvioerogatodiffns="http://invioerogatodiffrichiesta.xsd.dem.sanita.finanze.it" xmlns:ricevutaricercaerogatodiffns="http://ricercaerogatodiffricevuta.xsd.dem.sanita.finanze.it" xmlns:richiestaricercaerogatodiffns="http://ricercaerogatodiffrichiesta.xsd.dem.sanita.finanze.it" xmlns:ricevutavisualizzaerogatodiffns="http://visualizzaerogatodiffricevuta.xsd.dem.sanita.finanze.it" xmlns:richiestavisualizzaerogatodiffns="http://visualizzaerogatodiffrichiesta.xsd.dem.sanita.finanze.it" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://demricettadifferita.wsdl.dem.sanita.finanze.it" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://demricettadifferita.wsdl.dem.sanita.finanze.it">
+	<wsdl:types>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://inviosegnalazionerichiesta.xsd.dem.sanita.finanze.it" schemaLocation="InvioSegnalazioneRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://inviosegnalazionericevuta.xsd.dem.sanita.finanze.it" schemaLocation="InvioSegnalazioneRicevuta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://ricercasegnalazionirichiesta.xsd.dem.sanita.finanze.it" schemaLocation="RicercaSegnalazioniRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://ricercasegnalazioniricevuta.xsd.dem.sanita.finanze.it" schemaLocation="RicercaSegnalazioniRicevuta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://invioerogatodiffrichiesta.xsd.dem.sanita.finanze.it" schemaLocation="InvioErogatoDiffRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://invioerogatodiffricevuta.xsd.dem.sanita.finanze.it" schemaLocation="InvioErogatoDiffRicevuta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://ricercaerogatodiffrichiesta.xsd.dem.sanita.finanze.it" schemaLocation="RicercaErogatoDiffRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://ricercaerogatodiffricevuta.xsd.dem.sanita.finanze.it" schemaLocation="RicercaErogatoDiffRicevuta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://visualizzaerogatodiffrichiesta.xsd.dem.sanita.finanze.it" schemaLocation="VisualizzaErogatoDiffRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://visualizzaerogatodiffricevuta.xsd.dem.sanita.finanze.it" schemaLocation="VisualizzaErogatoDiffRicevuta.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	
+	<wsdl:message name="richiestaInvioSegnalazione">
+		<wsdl:part name="InvioSegnalazioneRichiesta" element="richiestainviosegnalazionens:InvioSegnalazioneRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaInvioSegnalazione">
+		<wsdl:part name="InvioSegnalazioneRicevuta" element="ricevutainviosegnalazionens:InvioSegnalazioneRicevuta"/>
+	</wsdl:message>
+	<wsdl:message name="richiestaRicercaSegnalazioni">
+		<wsdl:part name="RicercaSegnalazioniRichiesta" element="richiestaricercasegnalazionins:RicercaSegnalazioniRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaRicercaSegnalazioni">
+		<wsdl:part name="RicercaSegnalazioniRicevuta" element="ricevutaricercasegnalazionins:RicercaSegnalazioniRicevuta"/>
+	</wsdl:message>
+	<wsdl:message name="richiestaInvioErogatoDiff">
+		<wsdl:part name="InvioErogatoDiffRichiesta" element="richiestainvioerogatodiffns:InvioErogatoDiffRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaInvioErogatoDiff">
+		<wsdl:part name="InvioErogatoDiffRicevuta" element="ricevutainvioerogatodiffns:InvioErogatoDiffRicevuta"/>
+	</wsdl:message>
+	<wsdl:message name="richiestaRicercaErogatoDiff">
+		<wsdl:part name="RicercaErogatoDiffRichiesta" element="richiestaricercaerogatodiffns:RicercaErogatoDiffRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaRicercaErogatoDiff">
+		<wsdl:part name="RicercaErogatoDiffRicevuta" element="ricevutaricercaerogatodiffns:RicercaErogatoDiffRicevuta"/>
+	</wsdl:message>
+		<wsdl:message name="richiestaVisualizzaErogatoDiff">
+		<wsdl:part name="VisualizzaErogatoDiffRichiesta" element="richiestavisualizzaerogatodiffns:VisualizzaErogatoDiffRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaVisualizzaErogatoDiff">
+		<wsdl:part name="VisualizzaErogatoDiffRicevuta" element="ricevutavisualizzaerogatodiffns:VisualizzaErogatoDiffRicevuta"/>
+	</wsdl:message>
+	
+	<wsdl:portType name="ricettaDifferitaPT">
+		<wsdl:operation name="invioSegnalazione">
+			<wsdl:input name="richiestaInvioSegnalazione" message="tns:richiestaInvioSegnalazione"/>
+			<wsdl:output name="ricevutaInvioSegnalazione" message="tns:ricevutaInvioSegnalazione"/>
+		</wsdl:operation>
+		<wsdl:operation name="ricercaSegnalazioni">
+			<wsdl:input name="richiestaRicercaSegnalazioni" message="tns:richiestaRicercaSegnalazioni"/>
+			<wsdl:output name="ricevutaRicercaSegnalazioni" message="tns:ricevutaRicercaSegnalazioni"/>
+		</wsdl:operation>
+		<wsdl:operation name="invioErogatoDiff">
+			<wsdl:input name="richiestaInvioErogatoDiff" message="tns:richiestaInvioErogatoDiff"/>
+			<wsdl:output name="ricevutaInvioErogatoDiff" message="tns:ricevutaInvioErogatoDiff"/>
+		</wsdl:operation>
+		<wsdl:operation name="ricercaErogatoDiff">
+			<wsdl:input name="richiestaRicercaErogatoDiff" message="tns:richiestaRicercaErogatoDiff"/>
+			<wsdl:output name="ricevutaRicercaErogatoDiff" message="tns:ricevutaRicercaErogatoDiff"/>
+		</wsdl:operation>
+		<wsdl:operation name="visualizzaErogatoDiff">
+			<wsdl:input name="richiestaVisualizzaErogatoDiff" message="tns:richiestaVisualizzaErogatoDiff"/>
+			<wsdl:output name="ricevutaVisualizzaErogatoDiff" message="tns:ricevutaVisualizzaErogatoDiff"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	
+	<wsdl:binding name="ricettaDifferitaBinding" type="tns:ricettaDifferitaPT">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="invioSegnalazione">
+			<soap:operation soapAction="http://demricettadifferita.wsdl.dem.sanita.finanze.it/invioSegnalazione"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="ricercaSegnalazioni">
+			<soap:operation soapAction="http://demricettadifferita.wsdl.dem.sanita.finanze.it/ricercaSegnalazioni"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="invioErogatoDiff">
+			<soap:operation soapAction="http://demricettadifferita.wsdl.dem.sanita.finanze.it/invioErogatoDiff"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="ricercaErogatoDiff">
+			<soap:operation soapAction="http://demricettadifferita.wsdl.dem.sanita.finanze.it/ricercaErogatoDiff"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="visualizzaErogatoDiff">
+			<soap:operation soapAction="http://demricettadifferita.wsdl.dem.sanita.finanze.it/visualizzaErogatoDiff"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="ricettaDifferita">
+		<wsdl:port name="ricettaDifferita" binding="tns:ricettaDifferitaBinding">
+			<soap:address location="http://localhost:9080/DemRicettaDifferitaServicesWeb/services/ricettaDifferita"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

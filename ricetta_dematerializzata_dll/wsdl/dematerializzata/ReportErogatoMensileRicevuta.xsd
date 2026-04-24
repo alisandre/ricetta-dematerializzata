@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://reporterogatomensilericevuta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipodatireportcsv.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://reporterogatomensilericevuta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipodatireportcsv.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiReportCsv.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.2</xs:documentation>
+	</xs:annotation>
+	<xs:element name="ReportErogatoMensileRicevuta">
+		<xs:annotation>
+			<xs:documentation>Elemento base per la ricevuta di reportistica delle ricette erogate nel mese</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="fileCSV" type="td:fileType">
+					<xs:annotation>
+						<xs:documentation>Il file CSV contenente i dati delle ricette erogate nel mese richiesto</xs:documentation>
+					</xs:annotation>
+				</xs:element>								
+				<xs:element name="codEsitoVisualizzazione" type="td:codEsitoType">
+					<xs:annotation>
+						<xs:documentation>Codice dell'esito della visualizzazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ElencoErroriRicette" type="td:elencoErroriRicetteType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di ErroreRicetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ElencoComunicazioni" type="td:elencoComunicazioniType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di Comunicazioni di servizio</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

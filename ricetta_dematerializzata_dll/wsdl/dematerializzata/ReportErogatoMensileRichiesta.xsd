@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://reporterogatomensilerichiesta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipodatireportcsv.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://reporterogatomensilerichiesta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipodatireportcsv.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiReportCsv.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.0</xs:documentation>
+	</xs:annotation>
+	<xs:element name="ReportErogatoMensileRichiesta">
+		<xs:annotation>
+			<xs:documentation>Elemento base per la richiesta di reportistica delle ricette erogate nel mese</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="pinCode" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>PinCode inviante</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codiceRegioneErogatore" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>Codice regione della struttura erogatrice</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codiceAslErogatore" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>Codice ASL della struttura erogatrice</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codiceSsaErogatore" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>Codice SSA della struttura erogatrice</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<!-- xs:element name="pwd" type="td:pwdType">
+					<xs:annotation>
+						<xs:documentation>identificativo dell'utente che ha effettuato l'operazione</xs:documentation>
+					</xs:annotation>
+				</xs:element -->
+				<xs:element name="annoMese" type="td:annoMeseType">
+					<xs:annotation>
+						<xs:documentation>Anno mese della richiesta nel formato AAAAMM</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://serviceanagricevuta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipidatiserviceanag.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://serviceanagricevuta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipidatiserviceanag.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiServiceAnag.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.2</xs:documentation>
+	</xs:annotation>
+	<xs:element name="ServiceAnagRicevuta">
+		<xs:annotation>
+			<xs:documentation>Elemento base per la ricevuta dell'anagrafica e di altri servizi per la ricetta dematerializzata</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="nomefileCSV" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Nome del file CSV</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="fileCSV" type="td:fileType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Il file CSV contenente l'anagrafica richiesta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="opzione1" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo opzionale</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="opzione2" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo opzionale</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="opzione3" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo opzionale</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="opzione4" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo opzionale</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="opzione5" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo opzionale</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codEsitoOperazione" type="td:codEsitoType">
+					<xs:annotation>
+						<xs:documentation>Codice dell'esito dell'operazione richiesta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ElencoErroriRicette" type="td:elencoErroriRicetteType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di ErroreRicetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="ElencoComunicazioni" type="td:elencoComunicazioniType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Ripetizione di Comunicazioni di servizio</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

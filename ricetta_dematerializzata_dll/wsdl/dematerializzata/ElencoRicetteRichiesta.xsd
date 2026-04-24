@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns="http://elencoricetterichiesta.xsd.dem.sanita.finanze.it" xmlns:td="http://tipodati.xsd.dem.sanita.finanze.it" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://elencoricetterichiesta.xsd.dem.sanita.finanze.it" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:import namespace="http://tipodati.xsd.dem.sanita.finanze.it" schemaLocation="TipiDatiRicercaErogatore.xsd"/>
+	<xs:annotation>
+		<xs:documentation>Versione 1.2</xs:documentation>
+	</xs:annotation>
+	<xs:element name="ElencoRicetteRichiesta">
+		<xs:annotation>
+			<xs:documentation>Elemento base per la richiesta di interrogazione dei nre associati all'erogatore</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="pinCode" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>PinCode inviante</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codiceRegioneErogatore" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>Codice regione della struttura erogatrice</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codiceAslErogatore" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>Codice ASL della struttura erogatrice</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="codiceSsaErogatore" type="td:stringType">
+					<xs:annotation>
+						<xs:documentation>Codice SSA della struttura erogatrice</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="pwd" type="td:pwdType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>identificativo dell'utente che ha effettuato l'operazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="nre" type="td:nreType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Numero Ricetta Elettronica</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="cfAssistito" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Codice fiscale dell’assistito prelevato dalla Tessera Sanitaria</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="dataPeriodoDal" type="td:dataOraType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Data periodo “DAL” nel formato aaaa-mm-gg</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="dataPeriodoAl" type="td:dataOraType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Data periodo “AL” nel formato aaaa-mm-gg</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="tipoData" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Tipo di data utilizzata per la ricerca: P = data di Presa in carico - E = data di Erogazione</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="statoRicetta" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Stato della ricetta</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="disp1" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo a disposizione</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="disp2" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo a disposizione</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="disp3" type="td:stringType" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Campo a disposizione</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:ricevutaelencoricettens="http://elencoricettericevuta.xsd.dem.sanita.finanze.it" xmlns:richiestaelencoricettens="http://elencoricetterichiesta.xsd.dem.sanita.finanze.it" xmlns:ricevutaelencostoriconrens="http://elencostoriconrericevuta.xsd.dem.sanita.finanze.it" xmlns:richiestaelencostoriconrens="http://elencostoriconrerichiesta.xsd.dem.sanita.finanze.it" xmlns:ricevutavisualizzaricettans="http://visualizzaricettaricevuta.xsd.dem.sanita.finanze.it" xmlns:richiestavisualizzaricettans="http://visualizzaricettarichiesta.xsd.dem.sanita.finanze.it" xmlns:ricevutavisualizzaricettastoricons="http://visualizzaricettastoricoricevuta.xsd.dem.sanita.finanze.it" xmlns:richiestavisualizzaricettastoricons="http://visualizzaricettastoricorichiesta.xsd.dem.sanita.finanze.it" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://demricettaricercaerogatore.wsdl.dem.sanita.finanze.it" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://demricettaricercaerogatore.wsdl.dem.sanita.finanze.it">
+	<wsdl:types>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://elencoricetterichiesta.xsd.dem.sanita.finanze.it" schemaLocation="ElencoRicetteRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://elencoricettericevuta.xsd.dem.sanita.finanze.it" schemaLocation="ElencoRicetteRicevuta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://elencostoriconrerichiesta.xsd.dem.sanita.finanze.it" schemaLocation="ElencoStoricoNreRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://elencostoriconrericevuta.xsd.dem.sanita.finanze.it" schemaLocation="ElencoStoricoNreRicevuta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://visualizzaricettarichiesta.xsd.dem.sanita.finanze.it" schemaLocation="VisualizzaRicettaRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://visualizzaricettaricevuta.xsd.dem.sanita.finanze.it" schemaLocation="VisualizzaRicettaRicevuta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://visualizzaricettastoricorichiesta.xsd.dem.sanita.finanze.it" schemaLocation="VisualizzaRicettaStoricoRichiesta.xsd"/>
+		</xsd:schema>
+		<xsd:schema elementFormDefault="qualified">
+			<xsd:import namespace="http://visualizzaricettastoricoricevuta.xsd.dem.sanita.finanze.it" schemaLocation="VisualizzaRicettaStoricoRicevuta.xsd"/>
+		</xsd:schema>
+	</wsdl:types>
+	<wsdl:message name="richiestaElencoRicette">
+		<wsdl:part name="ElencoRicetteRichiesta" element="richiestaelencoricettens:ElencoRicetteRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaElencoRicette">
+		<wsdl:part name="ElencoRicetteRicevuta" element="ricevutaelencoricettens:ElencoRicetteRicevuta"/>
+	</wsdl:message>
+	<wsdl:message name="richiestaElencoStoricoNre">
+		<wsdl:part name="ElencoStoricoNreRichiesta" element="richiestaelencostoriconrens:ElencoStoricoNreRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaElencoStoricoNre">
+		<wsdl:part name="ElencoStoricoNreRicevuta" element="ricevutaelencostoriconrens:ElencoStoricoNreRicevuta"/>
+	</wsdl:message>
+	<wsdl:message name="richiestaVisualizzaRicetta">
+		<wsdl:part name="VisualizzaRicettaRichiesta" element="richiestavisualizzaricettans:VisualizzaRicettaRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaVisualizzaRicetta">
+		<wsdl:part name="VisualizzaRicettaRicevuta" element="ricevutavisualizzaricettans:VisualizzaRicettaRicevuta"/>
+	</wsdl:message>
+	<wsdl:message name="richiestaVisualizzaRicettaStorico">
+		<wsdl:part name="VisualizzaRicettaStoricoRichiesta" element="richiestavisualizzaricettastoricons:VisualizzaRicettaStoricoRichiesta"/>
+	</wsdl:message>
+	<wsdl:message name="ricevutaVisualizzaRicettaStorico">
+		<wsdl:part name="VisualizzaRicettaStoricoRicevuta" element="ricevutavisualizzaricettastoricons:VisualizzaRicettaStoricoRicevuta"/>
+	</wsdl:message>
+	<wsdl:portType name="ricercaErogatorePT">
+		<wsdl:operation name="elencoRicette">
+			<wsdl:input name="richiestaElencoRicette" message="tns:richiestaElencoRicette"/>
+			<wsdl:output name="ricevutaElencoRicette" message="tns:ricevutaElencoRicette"/>
+		</wsdl:operation>
+		<wsdl:operation name="elencoStoricoNre">
+			<wsdl:input name="richiestaElencoStoricoNre" message="tns:richiestaElencoStoricoNre"/>
+			<wsdl:output name="ricevutaElencoStoricoNre" message="tns:ricevutaElencoStoricoNre"/>
+		</wsdl:operation>
+		<wsdl:operation name="visualizzaRicetta">
+			<wsdl:input name="richiestaVisualizzaRicetta" message="tns:richiestaVisualizzaRicetta"/>
+			<wsdl:output name="ricevutaVisualizzaRicetta" message="tns:ricevutaVisualizzaRicetta"/>
+		</wsdl:operation>
+		<wsdl:operation name="visualizzaRicettaStorico">
+			<wsdl:input name="richiestaVisualizzaRicettaStorico" message="tns:richiestaVisualizzaRicettaStorico"/>
+			<wsdl:output name="ricevutaVisualizzaRicettaStorico" message="tns:ricevutaVisualizzaRicettaStorico"/>
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="ricercaErogatoreBinding" type="tns:ricercaErogatorePT">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<wsdl:operation name="elencoRicette">
+			<soap:operation soapAction="http://demricettaricercaerogatore.wsdl.dem.sanita.finanze.it/elencoRicette"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="elencoStoricoNre">
+			<soap:operation soapAction="http://demricettaricercaerogatore.wsdl.dem.sanita.finanze.it/elencoStoricoNre"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="visualizzaRicetta">
+			<soap:operation soapAction="http://demricettaricercaerogatore.wsdl.dem.sanita.finanze.it/visualizzaRicetta"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="visualizzaRicettaStorico">
+			<soap:operation soapAction="http://demricettaricercaerogatore.wsdl.dem.sanita.finanze.it/visualizzaRicettaStorico"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="ricercaErogatore">
+		<wsdl:port name="ricercaErogatore" binding="tns:ricercaErogatoreBinding">
+			<soap:address location="http://localhost:9080/DemRicettaRicercaErogatoreServicesWeb/services/ricercaErogatore"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

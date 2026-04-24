@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" 
+			targetNamespace="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" 
+			xmlns="http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it"
+			xmlns:dt="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it">
+
+	<xs:import namespace="http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it" schemaLocation="sts-a2f-service-data-type.v0.1.xsd"/>
+	
+	<xs:annotation>
+		<xs:documentation>Versione 0.1</xs:documentation>
+	</xs:annotation>
+	
+	<xs:element name="CreateAuthReq" type="CreateAuthReq">
+	</xs:element>
+	<xs:element name="CreateAuthRes" type="CreateAuthRes">
+	</xs:element>
+	
+	<xs:element name="RevokeAuthReq" type="RevokeAuthReq">
+	</xs:element>
+	<xs:element name="RevokeAuthRes" type="RevokeAuthRes">
+	</xs:element>
+	
+	<xs:element name="CheckTokenReq" type="CheckTokenReq">
+	</xs:element>
+	<xs:element name="CheckTokenRes" type="CheckTokenRes">
+	</xs:element>
+	
+	<xs:complexType name="CreateAuthReq">
+		<xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="userId" type="dt:stringTypeMax16">
+				<xs:annotation>
+					<xs:documentation>UserID di SistemaTS per l'utente. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="identificativo" type="dt:identificativo">
+				<xs:annotation>
+					<xs:documentation>Codice PIN o altro codice (in possesso del soggetto abilitato all’invio) cifrato. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="cfUtente" type="dt:cfType">
+				<xs:annotation>
+					<xs:documentation>Codice Fiscale Dell'utente. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="codRegione" type="dt:codRegioneType">
+				<xs:annotation>
+					<xs:documentation>Codice Regione / Provincia Autonoma o Codice Amministrazione di appartenenza del soggetto indicato in cfUtente.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="codAslAo" type="dt:codAslType">
+				<xs:annotation>
+					<xs:documentation>Codice ASL o Subcodice Amministrazione di appartenenza del soggetto indicato in cfUtente. Se non applicabile e richiesto dal contesto, valorizzare con "000"</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="codSsa" type="dt:codSsaType">
+				<xs:annotation>
+					<xs:documentation>Codice SSA appartenenza del soggetto. Se non applicabile e richiesto dal contesto, valorizzare con "000000"</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="codiceStruttura" type="dt:codStrutturaType">
+				<xs:annotation>
+					<xs:documentation>Codice della struttura di appartenenza del medico. Se non applicabile e richiesto dal contesto, valorizzare con stringa vuota</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="contesto" type="dt:contestoType">
+				<xs:annotation>
+					<xs:documentation>Contesto di validità del token.</xs:documentation>
+				</xs:annotation>
+			</xs:element>			
+			<xs:element minOccurs="0" maxOccurs="1" name="applicazione" type="dt:applicazioneType">
+				<xs:annotation>
+					<xs:documentation>Se il contesto è suddiviso in più applicazioni, indica l'applicazione dove il Token viene consumato</xs:documentation>
+				</xs:annotation>
+			</xs:element>				
+           	<xs:element minOccurs="0" name="opzioni" type="dt:opzioni">
+				<xs:annotation>
+					<xs:documentation>Eventuali campi opzionali. Alcuni contesti potrebbero richiederne la presenza.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+           	<xs:element minOccurs="0" name="infoAggiuntive" type="dt:infoAggiuntive">
+				<xs:annotation>
+					<xs:documentation>Elenco di informazioni in input aggiuntive, tipicamente utilizzate in ambiente di test</xs:documentation>
+				</xs:annotation>
+			</xs:element>			
+		</xs:sequence>		
+	</xs:complexType>
+	
+	<xs:complexType name="CreateAuthRes">
+		<xs:sequence>
+			<xs:element minOccurs="1" maxOccurs="1" name="codEsito" type="dt:esitoType">
+				<xs:annotation>
+					<xs:documentation>Esito della transazione: 0=Esito positivo e restituzione dati, 1=Esito negativo (comunicazioni errori/warning in apposita sezione) e restituzione dati. Per i codici di errore/warning vedere documentazione.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="errori" type="dt:errori"/>
+            <xs:element minOccurs="0" name="info" type="dt:info">
+				<xs:annotation>
+					<xs:documentation>Struttura per altre comunicazioni in risposta. Tipicamente utilizzate in ambiente di test</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" name="comunicazioni" type="dt:comunicazioni"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="RevokeAuthReq">
+		<xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="userId" type="dt:stringTypeMax16">
+				<xs:annotation>
+					<xs:documentation>UserID di SistemaTS per l'utente. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="identificativo" type="dt:identificativo">
+				<xs:annotation>
+					<xs:documentation>Codice PIN o altro codice (in possesso del soggetto abilitato all’invio) cifrato.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="cfUtente" type="dt:cfType">
+				<xs:annotation>
+					<xs:documentation>Codice Fiscale Dell'utente. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="1" maxOccurs="1" name="token" type="dt:tokenType">
+				<xs:annotation>
+					<xs:documentation>Token ricevuto tramite l'operazione "create".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="contesto" type="dt:contestoType">
+				<xs:annotation>
+					<xs:documentation>Contesto di validità per il quale il token è stato richiesto.</xs:documentation>
+				</xs:annotation>
+			</xs:element>			
+			<xs:element minOccurs="0" maxOccurs="1" name="applicazione" type="dt:applicazioneType">
+				<xs:annotation>
+					<xs:documentation>Se il contesto è suddiviso in più applicazioni, indica l'applicazione per la quale il Token è stato richiesto.</xs:documentation>
+				</xs:annotation>
+			</xs:element>			
+          	<xs:element minOccurs="0" name="opzioni" type="dt:opzioni">
+				<xs:annotation>
+					<xs:documentation>Eventuali campi opzionali. Alcuni contesti potrebbero richiederne la presenza.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+           	<xs:element minOccurs="0" name="infoAggiuntive" type="dt:infoAggiuntive">
+				<xs:annotation>
+					<xs:documentation>Elenco di informazioni in input aggiuntive, tipicamente utilizzate in ambiente di test</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="RevokeAuthRes">
+		<xs:sequence>
+			<xs:element minOccurs="1" maxOccurs="1" name="codEsito" type="dt:esitoType">
+				<xs:annotation>
+					<xs:documentation>Esito della transazione: 0=Esito positivo e restituzione dati, 1=Esito negativo (comunicazioni errori/warning in apposita sezione) e restituzione dati. Per i codici di errore/warning vedere documentazione..</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="errori" type="dt:errori"/>
+            <xs:element minOccurs="0" name="info" type="dt:info">
+				<xs:annotation>
+					<xs:documentation>Struttura per altre comunicazioni in risposta. Tipicamente utilizzati in ambiente di test</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" name="comunicazioni" type="dt:comunicazioni"/>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="CheckTokenReq">
+		<xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="userId" type="dt:stringTypeMax16">
+				<xs:annotation>
+					<xs:documentation>UserID di SistemaTS per l'utente. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="identificativo" type="dt:identificativo">
+				<xs:annotation>
+					<xs:documentation>Codice PIN o altro codice (in possesso del soggetto abilitato all’invio) cifrato. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" maxOccurs="1" name="cfUtente" type="dt:cfType">
+				<xs:annotation>
+					<xs:documentation>Codice Fiscale Dell'utente. Obbligatorio oppure opzionale a seconda del parametro "contesto".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="1" maxOccurs="1" name="token" type="dt:tokenType">
+				<xs:annotation>
+					<xs:documentation>Token ricevuto tramite l'operazione "create".</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" maxOccurs="1" name="contesto" type="dt:contestoType">
+				<xs:annotation>
+					<xs:documentation>Contesto di validità per il quale il token è stato richiesto.</xs:documentation>
+				</xs:annotation>
+			</xs:element>			
+			<xs:element minOccurs="0" maxOccurs="1" name="applicazione" type="dt:applicazioneType">
+				<xs:annotation>
+					<xs:documentation>Se il contesto è suddiviso in più applicazioni, indica l'applicazione per la quale il Token è stato richiesto.</xs:documentation>
+				</xs:annotation>
+			</xs:element>			
+          	<xs:element minOccurs="0" name="opzioni" type="dt:opzioni">
+				<xs:annotation>
+					<xs:documentation>Eventuali campi opzionali. Alcuni contesti potrebbero richiederne la presenza.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+           	<xs:element minOccurs="0" name="infoAggiuntive" type="dt:infoAggiuntive">
+				<xs:annotation>
+					<xs:documentation>Elenco di informazioni in input aggiuntive, tipicamente utilizzate in ambiente di test</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="CheckTokenRes">
+		<xs:sequence>
+			<xs:element minOccurs="1" maxOccurs="1" name="codEsito" type="dt:esitoType">
+				<xs:annotation>
+					<xs:documentation>Esito della transazione: 0=Esito positivo e restituzione dati, 1=Esito negativo (comunicazioni errori/warning in apposita sezione) e restituzione dati. Per i codici di errore/warning vedere documentazione.</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element minOccurs="0" name="errori" type="dt:errori"/>
+            <xs:element minOccurs="0" maxOccurs="1" name="infoToken" type="dt:infoToken" />
+            <xs:element minOccurs="0" name="info" type="dt:info">
+				<xs:annotation>
+					<xs:documentation>Struttura per altre comunicazioni in risposta. Tipicamente utilizzati in ambiente di test</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+            <xs:element minOccurs="0" name="comunicazioni" type="dt:comunicazioni"/>
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>
