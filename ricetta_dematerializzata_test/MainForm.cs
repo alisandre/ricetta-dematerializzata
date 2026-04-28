@@ -2,78 +2,398 @@ using ricetta_dematerializzata_dll.Core;
 using ricetta_dematerializzata_dll.Models;
 using ricetta_dematerializzata_dll.Services;
 using System;
-using System.Drawing;
-using System.IO;
 using System.Windows.Forms;
 
 namespace ricetta_dematerializzata_test_ui
 {
     public partial class MainForm : Form
     {
-        private TextBox _txtUsername = null!;
-        private TextBox _txtPassword = null!;
-        private ComboBox _cmbServizio = null!;
-        private TextBox _txtInput = null!;
-        private TextBox _txtOutput = null!;
-        private TextBox _txtAuthorization2F = null!;
-        private CheckBox _chkIgnoraSsl = null!;
-        private CheckBox _chkProduzione = null!;
-        private Button _btnChiama = null!;
         private const string NomeCertificatoSanitel = "SanitelCF-2024-2027.cer";
+
+        // Credenziali di test
+        private const string DefaultUsername    = "PROVAX00X00X000Y";
+        private const string DefaultPassword    = "Salve123";
+        private const string DefaultCfAssistito = "GLLGNN37B51C286O";
+
+        // Input default A2F
+        private const string DefaultUserId      = "PROVAX00X00X000Y";
+        private const string DefaultCfUtente    = "PROVAX00X00X000Y";
+        private const string DefaultIdentBase64 = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=";
+        private const string DefaultCodRegioneAuth = "130";
+        private const string DefaultCodAslAoAuth = "202";
+        private const string DefaultCodSsaAuth = "000000";
+        private const string DefaultCodStrutturaToken = "";
+        private const string DefaultCodStrutturaServizi = "201600104";
+        private const string DefaultCodRegioneServizi = "190";
+        private const string DefaultCodAslAoServizi = "201";
 
         public MainForm()
         {
             InitializeComponent();
-            _cmbServizio.DataSource = Enum.GetValues(typeof(DigitalPrescriptionService));
-            AggiornaUiPerServizio();
+
+            _txtUsername.Text     = DefaultUsername;
+            _txtPassword.Text     = DefaultPassword;
+            _chkIgnoraSsl.Checked = true;
+
+            // Combo servizi prescrittore
+            _cmbServizioP.DataSource = new[]
+            {
+                DigitalPrescriptionService.VisualizzaPrescritto,
+                DigitalPrescriptionService.InvioPrescritto,
+                DigitalPrescriptionService.AnnullaPrescritto,
+                DigitalPrescriptionService.InterrogaNreUtilizzati,
+                DigitalPrescriptionService.ServiceAnagPrescrittore,
+                DigitalPrescriptionService.InvioDichiarazioneSostituzioneMedico,
+            };
+            _cmbServizioP.SelectedIndexChanged += (s, e) => _txtInputP.Text = GetDefaultInput((DigitalPrescriptionService)_cmbServizioP.SelectedItem!);
+            _txtInputP.Text = GetDefaultInput(DigitalPrescriptionService.VisualizzaPrescritto);
+
+            // Combo servizi erogatore
+            _cmbServizioE.DataSource = new[]
+            {
+                DigitalPrescriptionService.InvioErogato,
+                DigitalPrescriptionService.VisualizzaErogato,
+                DigitalPrescriptionService.SospendiErogato,
+                DigitalPrescriptionService.AnnullaErogato,
+                DigitalPrescriptionService.RicercaErogatore,
+                DigitalPrescriptionService.ReportErogatoMensile,
+                DigitalPrescriptionService.ServiceAnagErogatore,
+                DigitalPrescriptionService.RicettaDifferita,
+                DigitalPrescriptionService.AnnullaErogatoDiff,
+                DigitalPrescriptionService.RicevuteSac,
+            };
+            _cmbServizioE.SelectedIndexChanged += (s, e) => _txtInputE.Text = GetDefaultInput((DigitalPrescriptionService)_cmbServizioE.SelectedItem!);
+            _txtInputE.Text = GetDefaultInput(DigitalPrescriptionService.InvioErogato);
+
+            LoadTokensFromStorage();
         }
 
-        private void BtnChiama_Click(object? sender, EventArgs e)
+        // ── Configurazione ────────────────────────────────────────────────────────
+
+        private ServiceConfiguration BuildConfig(string applicazione)
         {
+            var ambiente = _chkProduzione.Checked ? ServiceEnvironment.Produzione : ServiceEnvironment.Test;
+
+            // Scegli il campo Auth2F corretto in base al ruolo
+            var auth2FField = applicazione == "EROGATORE" ? _txtAuth2FE.Text.Trim() : _txtAuth2FP.Text.Trim();
+            var auth2F      = auth2FField;
+
+            // In test, se vuoto, genera automaticamente con la formula documentata
+            if (string.IsNullOrWhiteSpace(auth2F) && ambiente == ServiceEnvironment.Test)
+            {
+                var now = DateTime.Now;
+                auth2F = $"Bearer {_txtUsername.Text.Trim()}-{now.Year}-{now.Month:D2}-RICETTA-DEM-{applicazione}";
+            }
+
+            return new ServiceConfiguration
+            {
+                Username               = _txtUsername.Text.Trim(),
+                Password               = _txtPassword.Text,
+                Ambiente               = ambiente,
+                IgnoraErroriSsl        = _chkIgnoraSsl.Checked,
+                PathCertificatoSanitel = TrovaPathCertificatoSanitel(),
+                Authorization2F        = auth2F
+            };
+        }
+
+        private bool ValidaCredenziali()
+        {
+            if (string.IsNullOrWhiteSpace(_txtUsername.Text) || string.IsNullOrWhiteSpace(_txtPassword.Text))
+            {
+                MessageBox.Show("Inserire username e password.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        // ── A2F Input builder ─────────────────────────────────────────────────────
+
+        private string BuildA2FInput(string applicazione, string token = "", bool skipToken = false)
+        {
+            var t = skipToken ? "" : token;
+            return $"userId={DefaultUserId};identificativo={DefaultIdentBase64};cfUtente={DefaultCfUtente}"
+                 + $";codRegione={DefaultCodRegioneAuth};codAslAo={DefaultCodAslAoAuth};codSsa={DefaultCodSsaAuth}"
+                 + $";codiceStruttura={DefaultCodStrutturaToken};contesto=RICETTA-DEM;applicazione={applicazione}"
+                 + (string.IsNullOrWhiteSpace(t) ? "" : $";token={t}");
+        }
+
+        // ── TAB TOKEN – PRESCRITTORE ──────────────────────────────────────────────
+
+        private void BtnCreateTokenP_Click(object sender, EventArgs e)
+        {
+            if (!ValidaCredenziali()) return;
             try
             {
-                if (string.IsNullOrWhiteSpace(_txtUsername.Text) || string.IsNullOrWhiteSpace(_txtPassword.Text))
+                var client = new Auth2FClient(BuildConfig("PRESCRITTORE"));
+                var result = client.Create(BuildA2FInput("PRESCRITTORE", skipToken: true));
+                var token  = EstraiValoreCodice(result, "token");
+
+                if (!string.IsNullOrWhiteSpace(token))
                 {
-                    _txtOutput.Text = "Inserire username e password.";
-                    return;
+                    _txtTokenP.Text = token;
+                    TokenManager.SaveToken(token, "PRESCRITTORE");
+                    _txtA2FOutput.Text = $"✅ [PRESCRITTORE] Token creato:\r\n{token}\r\n\r\n{result}";
                 }
-
-                var config = new ServiceConfiguration
+                else
                 {
-                    Username = _txtUsername.Text.Trim(),
-                    Password = _txtPassword.Text,
-                    Ambiente = _chkProduzione.Checked ? AmbienteSanita.Produzione : AmbienteSanita.Test,
-                    IgnoraErroriSsl = _chkIgnoraSsl.Checked,
-                    Authorization2F = _txtAuthorization2F.Text?.Trim(),
-                    PathCertificatoSanitel = TrovaPathCertificatoSanitel()
-                };
-
-                var client = new PrescriptionClient(config);
-                var servizio = (DigitalPrescriptionService)_cmbServizio.SelectedItem;
-                var output = client.Chiama(servizio, _txtInput.Text ?? string.Empty);
-
-                _txtOutput.Text = output;
+                    _txtA2FOutput.Text = $"⚠️ [PRESCRITTORE] Token non trovato:\r\n{result}";
+                }
             }
-            catch (Exception ex)
-            {
-                _txtOutput.Text = $"ERRORE_NUMERO=9999;ERRORE_DESCRIZIONE={ex.Message}";
-            }
+            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
         }
 
-        private void CmbServizio_SelectedIndexChanged(object? sender, EventArgs e)
+        private void BtnCheckTokenP_Click(object sender, EventArgs e)
         {
-            AggiornaUiPerServizio();
+            if (!ValidaCredenziali()) return;
+            if (string.IsNullOrWhiteSpace(_txtTokenP.Text)) { _txtA2FOutput.Text = "❌ Nessun token PRESCRITTORE."; return; }
+            try
+            {
+                var client = new Auth2FClient(BuildConfig("PRESCRITTORE"));
+                var result = client.CheckToken(BuildA2FInput("PRESCRITTORE", _txtTokenP.Text));
+                if (IsA2FError(result))
+                {
+                    AzzeraInfoValiditaP();
+                    _txtA2FOutput.Text = $"❌ [PRESCRITTORE] Token non valido:\r\n{result}";
+                }
+                else
+                {
+                    PopolaInfoValidita(result, _txtStatoP, _txtInizioP, _txtFineP);
+                    _txtA2FOutput.Text = $"✅ [PRESCRITTORE] Token valido:\r\n{result}";
+                }
+            }
+            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
         }
 
-        private void AggiornaUiPerServizio()
+        private void BtnRevokeTokenP_Click(object sender, EventArgs e)
         {
-            if (_cmbServizio.SelectedItem is not DigitalPrescriptionService servizio)
+            if (!ValidaCredenziali()) return;
+            if (string.IsNullOrWhiteSpace(_txtTokenP.Text)) { _txtA2FOutput.Text = "❌ Nessun token PRESCRITTORE."; return; }
+            try
             {
-                _txtInput.Text = string.Empty;
+                var client = new Auth2FClient(BuildConfig("PRESCRITTORE"));
+                var result = client.Revoke(BuildA2FInput("PRESCRITTORE", _txtTokenP.Text));
+                if (!IsA2FError(result))
+                {
+                    var d = ParserKV.Parse(result);
+                    var desc = d.TryGetValue("VALORE", out var v) ? v : "Revoca eseguita";
+                    _txtTokenP.Text = string.Empty;
+                    TokenManager.ClearToken("PRESCRITTORE");
+                    AzzeraInfoValiditaP();
+                    _txtA2FOutput.Text = $"✅ [PRESCRITTORE] Token revocato:\r\n{desc}\r\n\r\n{result}";
+                }
+                else
+                {
+                    _txtA2FOutput.Text = $"❌ [PRESCRITTORE] Revoca fallita:\r\n{result}";
+                }
+            }
+            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
+        }
+
+        private void BtnInsertTokenP_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_txtTokenP.Text))
+            {
+                MessageBox.Show("Nessun token PRESCRITTORE. Prima esegui Create.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+            _txtAuth2FP.Text = _txtTokenP.Text;
+            _tabControl.SelectedTab = _tabPrescrittore;
+        }
 
-            _txtInput.Text = GetDefaultInput(servizio);
+        // ── TAB TOKEN – EROGATORE ─────────────────────────────────────────────────
+
+        private void BtnCreateTokenE_Click(object sender, EventArgs e)
+        {
+            if (!ValidaCredenziali()) return;
+            try
+            {
+                var client = new Auth2FClient(BuildConfig("EROGATORE"));
+                var result = client.Create(BuildA2FInput("EROGATORE", skipToken: true));
+                var token  = EstraiValoreCodice(result, "token");
+
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    _txtTokenE.Text = token;
+                    TokenManager.SaveToken(token, "EROGATORE");
+                    _txtA2FOutput.Text = $"✅ [EROGATORE] Token creato:\r\n{token}\r\n\r\n{result}";
+                }
+                else
+                {
+                    _txtA2FOutput.Text = $"⚠️ [EROGATORE] Token non trovato:\r\n{result}";
+                }
+            }
+            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
+        }
+
+        private void BtnCheckTokenE_Click(object sender, EventArgs e)
+        {
+            if (!ValidaCredenziali()) return;
+            if (string.IsNullOrWhiteSpace(_txtTokenE.Text)) { _txtA2FOutput.Text = "❌ Nessun token EROGATORE."; return; }
+            try
+            {
+                var client = new Auth2FClient(BuildConfig("EROGATORE"));
+                var result = client.CheckToken(BuildA2FInput("EROGATORE", _txtTokenE.Text));
+                if (IsA2FError(result))
+                {
+                    AzzeraInfoValiditaE();
+                    _txtA2FOutput.Text = $"❌ [EROGATORE] Token non valido:\r\n{result}";
+                }
+                else
+                {
+                    PopolaInfoValidita(result, _txtStatoE, _txtInizioE, _txtFineE);
+                    _txtA2FOutput.Text = $"✅ [EROGATORE] Token valido:\r\n{result}";
+                }
+            }
+            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
+        }
+
+        private void BtnRevokeTokenE_Click(object sender, EventArgs e)
+        {
+            if (!ValidaCredenziali()) return;
+            if (string.IsNullOrWhiteSpace(_txtTokenE.Text)) { _txtA2FOutput.Text = "❌ Nessun token EROGATORE."; return; }
+            try
+            {
+                var client = new Auth2FClient(BuildConfig("EROGATORE"));
+                var result = client.Revoke(BuildA2FInput("EROGATORE", _txtTokenE.Text));
+                if (!IsA2FError(result))
+                {
+                    var d = ParserKV.Parse(result);
+                    var desc = d.TryGetValue("VALORE", out var v) ? v : "Revoca eseguita";
+                    _txtTokenE.Text = string.Empty;
+                    TokenManager.ClearToken("EROGATORE");
+                    AzzeraInfoValiditaE();
+                    _txtA2FOutput.Text = $"✅ [EROGATORE] Token revocato:\r\n{desc}\r\n\r\n{result}";
+                }
+                else
+                {
+                    _txtA2FOutput.Text = $"❌ [EROGATORE] Revoca fallita:\r\n{result}";
+                }
+            }
+            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
+        }
+
+        private void BtnInsertTokenE_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_txtTokenE.Text))
+            {
+                MessageBox.Show("Nessun token EROGATORE. Prima esegui Create.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            _txtAuth2FE.Text = _txtTokenE.Text;
+            _tabControl.SelectedTab = _tabErogatore;
+        }
+
+        // ── TAB SERVIZI PRESCRITTORE ──────────────────────────────────────────────
+
+        private void BtnChiamaP_Click(object sender, EventArgs e)
+        {
+            if (!ValidaCredenziali()) return;
+            try
+            {
+                var config = BuildConfig("PRESCRITTORE");
+                var client = new PrescriptionClient(config);
+                var result = client.Chiama((DigitalPrescriptionService)_cmbServizioP.SelectedItem!, _txtInputP.Text);
+                _txtOutputP.Text = result;
+            }
+            catch (Exception ex) { _txtOutputP.Text = $"❌ {ex.Message}"; }
+        }
+
+        private void BtnDebugSoapP_Click(object sender, EventArgs e)
+            => MostraDebug();
+
+        // ── TAB SERVIZI EROGATORE ─────────────────────────────────────────────────
+
+        private void BtnChiamaE_Click(object sender, EventArgs e)
+        {
+            if (!ValidaCredenziali()) return;
+            try
+            {
+                var config = BuildConfig("EROGATORE");
+                var client = new PrescriptionClient(config);
+                var result = client.Chiama((DigitalPrescriptionService)_cmbServizioE.SelectedItem!, _txtInputE.Text);
+                _txtOutputE.Text = result;
+            }
+            catch (Exception ex) { _txtOutputE.Text = $"❌ {ex.Message}"; }
+        }
+
+        private void BtnDebugSoapE_Click(object sender, EventArgs e)
+            => MostraDebug();
+
+        private void BtnDebugSoapHeadersA2F_Click(object sender, EventArgs e)
+            => MostraDebug();
+
+        // ── Helpers ───────────────────────────────────────────────────────────────
+
+        private void PopolaInfoValidita(string result,
+            System.Windows.Forms.TextBox txtStato,
+            System.Windows.Forms.TextBox txtInizio,
+            System.Windows.Forms.TextBox txtFine)
+        {
+            var d = ParserKV.Parse(result);
+            d.TryGetValue("STATO",              out var stato);
+            d.TryGetValue("DESCRIZIONE",        out var desc);
+            d.TryGetValue("DATAINIZIOVALIDITA", out var dal);
+            d.TryGetValue("DATAFINEVALIDITA",   out var al);
+
+            txtStato.Text  = string.IsNullOrWhiteSpace(desc) ? stato ?? "" : $"{stato} – {desc}";
+            txtInizio.Text = FormatDataA2F(dal);
+            txtFine.Text   = FormatDataA2F(al);
+            txtFine.BackColor  = IsScaduto(al) ? System.Drawing.Color.LightCoral : System.Drawing.Color.LightGreen;
+            txtInizio.BackColor = System.Drawing.Color.WhiteSmoke;
+        }
+
+        private void AzzeraInfoValiditaP()
+        {
+            _txtStatoP.Text       = string.Empty;
+            _txtInizioP.Text      = string.Empty;
+            _txtFineP.Text        = string.Empty;
+            _txtFineP.BackColor   = System.Drawing.Color.WhiteSmoke;
+            _txtInizioP.BackColor = System.Drawing.Color.WhiteSmoke;
+        }
+
+        private void AzzeraInfoValiditaE()
+        {
+            _txtStatoE.Text       = string.Empty;
+            _txtInizioE.Text      = string.Empty;
+            _txtFineE.Text        = string.Empty;
+            _txtFineE.BackColor   = System.Drawing.Color.WhiteSmoke;
+            _txtInizioE.BackColor = System.Drawing.Color.WhiteSmoke;
+        }
+
+        private static string FormatDataA2F(string? iso)
+        {
+            if (string.IsNullOrWhiteSpace(iso)) return string.Empty;
+            return DateTimeOffset.TryParse(iso, out var dto)
+                ? dto.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
+                : iso;
+        }
+
+        private static bool IsScaduto(string? iso)
+            => DateTimeOffset.TryParse(iso, out var dto) && dto < DateTimeOffset.Now;
+
+        private static bool IsA2FError(string result)
+        {
+            if (string.IsNullOrWhiteSpace(result)) return true;
+            var d = ParserKV.Parse(result);
+            if (d.ContainsKey("ERRORE_NUMERO")) return true;
+            if (d.TryGetValue("CODESITO", out var esito) && esito != "0") return true;
+            return false;
+        }
+
+        private static string? EstraiValoreCodice(string kv, string codice)
+        {
+            var dict     = ParserKV.Parse(kv);
+            var suffissi = new[] { "", "_1", "_2", "_3", "_4", "_5", "_6", "_7", "_8", "_9" };
+            foreach (var s in suffissi)
+            {
+                var kc = ("CODICE"    + s).ToUpperInvariant();
+                var km = ("MESSAGGIO" + s).ToUpperInvariant();
+                if (dict.TryGetValue(kc, out var val) &&
+                    string.Equals(val, codice, StringComparison.OrdinalIgnoreCase) &&
+                    dict.TryGetValue(km, out var msg))
+                    return msg;
+            }
+            return null;
         }
 
         private static string GetDefaultInput(DigitalPrescriptionService servizio)
@@ -81,98 +401,92 @@ namespace ricetta_dematerializzata_test_ui
             {
                 DigitalPrescriptionService.VisualizzaPrescritto =>
                     "pinCode=1234567890;nre=120000000000;cfMedico=PROVAX00X00X000Y",
-
                 DigitalPrescriptionService.InvioPrescritto =>
-                    "pinCode=1234567890;cfMedico1=PROVAX00X00X000Y;codRegione=190;codASLAo=201;codSpecializzazione=P;tipoPrescrizione=F;dataCompilazione=2026-01-01 10:00:00;tipoVisita=A;ElencoDettagliPrescrizioni=DETTAGLIO_MINIMO",
-
+                    $"pinCode=1234567890;cfMedico1=PROVAX00X00X000Y;codRegione={DefaultCodRegioneServizi};codASLAo={DefaultCodAslAoServizi};codStruttura={DefaultCodStrutturaServizi};codSpecializzazione=P;tipoPrescrizione=F;dataCompilazione=2026-01-01 10:00:00;tipoVisita=A;ElencoDettagliPrescrizioni=DETTAGLIO_MINIMO",
                 DigitalPrescriptionService.AnnullaPrescritto =>
                     "pinCode=1234567890;nre=120000000000;cfMedico=PROVAX00X00X000Y",
-
                 DigitalPrescriptionService.InterrogaNreUtilizzati =>
-                    "pinCode=1234567890;codRegione=190;cfMedico=PROVAX00X00X000Y",
-
+                    $"pinCode=1234567890;codRegione={DefaultCodRegioneServizi};cfMedico=PROVAX00X00X000Y",
                 DigitalPrescriptionService.ServiceAnagPrescrittore =>
                     "pinCode=1234567890;tipoOperazione=1",
-
                 DigitalPrescriptionService.InvioDichiarazioneSostituzioneMedico =>
-                    "pinCode=1234567890;pwd=UTENTE;cfMedicoTitolare=PROVAX00X00X000Y;codRegione=190;codASLAo=201;codSpecializzazione=P;cfMedicoSostituto=RSSMRA80A01H501T;dataInizioSostituzione=2026-01-01;dataFineSostituzione=2026-01-31",
-
+                    $"pinCode=1234567890;pwd=UTENTE;cfMedicoTitolare=PROVAX00X00X000Y;codRegione={DefaultCodRegioneServizi};codASLAo={DefaultCodAslAoServizi};codSpecializzazione=P;cfMedicoSostituto=RSSMRA80A01H501T;dataInizioSostituzione=2026-01-01;dataFineSostituzione=2026-01-31",
                 DigitalPrescriptionService.InvioErogato =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104;nre=120000000000;tipoOperazione=I;dataSpedizione=2026-01-01",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi};nre=120000000000;tipoOperazione=I;dataSpedizione=2026-01-01",
                 DigitalPrescriptionService.VisualizzaErogato =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104;nre=120000000000;tipoOperazione=V",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi};nre=120000000000;tipoOperazione=V;cfAssistito={DefaultCfAssistito}",
                 DigitalPrescriptionService.SospendiErogato =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104;nre=120000000000;tipoOperazione=S",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi};nre=120000000000;tipoOperazione=S",
                 DigitalPrescriptionService.AnnullaErogato =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104;nre=120000000000;codAnnullamento=1",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi};nre=120000000000;codAnnullamento=1",
                 DigitalPrescriptionService.RicercaErogatore =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi}",
                 DigitalPrescriptionService.ReportErogatoMensile =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104;annoMese=202601",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi};annoMese=202601",
                 DigitalPrescriptionService.ServiceAnagErogatore =>
                     "pinCode=1234567890;tipoOperazione=1",
-
                 DigitalPrescriptionService.RicettaDifferita =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104;codMotivazione=01;dataDal=2026-01-01",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi};codMotivazione=1;dataDal=2026-01-01",
                 DigitalPrescriptionService.AnnullaErogatoDiff =>
-                    "pinCode=1234567890;codiceRegioneErogatore=190;codiceAslErogatore=201;codiceSsaErogatore=201600104;idRicetta=ID001;nre=120000000000",
-
+                    $"pinCode=1234567890;codiceRegioneErogatore={DefaultCodRegioneServizi};codiceAslErogatore={DefaultCodAslAoServizi};codiceSsaErogatore={DefaultCodStrutturaServizi};idRicetta=1;nre=120000000000",
                 DigitalPrescriptionService.RicevuteSac =>
                     "pinCode=1234567890",
-
-                DigitalPrescriptionService.CreateAuth =>
-                    "userId=PROVAX00X00X000Y;cfUtente=PROVAX00X00X000Y;codRegione=190;codAslAo=201;codSsa=201600;codiceStruttura=;contesto=DEM;applicazione=PRESCRITTO",
-
-                DigitalPrescriptionService.RevokeAuth =>
-                    "userId=PROVAX00X00X000Y;cfUtente=PROVAX00X00X000Y;token=00000000-0000-0000-0000-000000000000;contesto=DEM;applicazione=PRESCRITTO",
-
-                DigitalPrescriptionService.CheckToken =>
-                    "userId=PROVAX00X00X000Y;cfUtente=PROVAX00X00X000Y;token=00000000-0000-0000-0000-000000000000;contesto=DEM;applicazione=PRESCRITTO",
-
                 _ => string.Empty
             };
 
-        private static bool IsServizioErogatore(DigitalPrescriptionService servizio)
-            => servizio switch
-            {
-                DigitalPrescriptionService.InvioErogato => true,
-                DigitalPrescriptionService.VisualizzaErogato => true,
-                DigitalPrescriptionService.SospendiErogato => true,
-                DigitalPrescriptionService.AnnullaErogato => true,
-                DigitalPrescriptionService.RicercaErogatore => true,
-                DigitalPrescriptionService.ReportErogatoMensile => true,
-                DigitalPrescriptionService.ServiceAnagErogatore => true,
-                DigitalPrescriptionService.RicettaDifferita => true,
-                DigitalPrescriptionService.AnnullaErogatoDiff => true,
-                DigitalPrescriptionService.RicevuteSac => true,
-                _ => false
-            };
-
-        private static string? TrovaPathCertificatoSanitel()
+        private void LoadTokensFromStorage()
         {
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            try { var t = TokenManager.LoadToken("PRESCRITTORE"); if (!string.IsNullOrWhiteSpace(t)) _txtTokenP.Text = t; } catch { }
+            try { var t = TokenManager.LoadToken("EROGATORE");    if (!string.IsNullOrWhiteSpace(t)) _txtTokenE.Text = t; } catch { }
+        }
 
-            var candidati = new[]
+        private string TrovaPathCertificatoSanitel()
+        {
+            var paths = new[]
             {
-                Path.Combine(baseDir, "certificates", NomeCertificatoSanitel),
-                Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "ricetta_dematerializzata_dll", "certificates", NomeCertificatoSanitel)),
-                Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "..", "ricetta_dematerializzata_dll", "certificates", NomeCertificatoSanitel))
+                System.IO.Path.Combine(Application.StartupPath, NomeCertificatoSanitel),
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), NomeCertificatoSanitel),
+                System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), NomeCertificatoSanitel)
             };
+            foreach (var p in paths)
+                if (System.IO.File.Exists(p)) return p;
+            return string.Empty;
+        }
 
-            foreach (var path in candidati)
+        private void MostraDebug()
+        {
+            var debugInfo = SoapDebugCapture.GetLastDebugInfo();
+            if (debugInfo == null)
             {
-                if (File.Exists(path))
-                    return path;
+                MessageBox.Show("Nessuna richiesta SOAP catturata.", "Debug SOAP", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
             }
-
-            return null;
+            var content = SoapDebugCapture.FormatDebugInfo(debugInfo);
+            var form = new Form
+            {
+                Text = "SOAP Debug", Width = 1000, Height = 700,
+                StartPosition = FormStartPosition.CenterParent
+            };
+            var tb  = new TextBox { Multiline = true, ReadOnly = true, Dock = DockStyle.Fill, Font = new System.Drawing.Font("Courier New", 9f), Text = content, ScrollBars = ScrollBars.Both };
+            var btn = new Button  { Text = "📋 Copia", Dock = DockStyle.Bottom, Height = 35 };
+            btn.Click += (s, e2) => { try { Clipboard.SetText(content); } catch { } };
+            form.Controls.Add(tb);
+            form.Controls.Add(btn);
+            form.ShowDialog(this);
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

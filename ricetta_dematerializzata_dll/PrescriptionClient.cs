@@ -26,7 +26,6 @@ namespace ricetta_dematerializzata_dll.Services
     {
         private ServiceConfiguration? _config;
         private SoapHttpClient? _httpClient;
-        private const string Authorization2FTestFisso = "Bearer PROVAX00X00X000Y-2025-08-RICETTA-DEM-PRESCRITTORE";
         private const string NomeCertificatoSanitelDefault = "SanitelCF-2024-2027.cer";
 
         // ── Costruttori ───────────────────────────────────────────────────────────
@@ -41,7 +40,8 @@ namespace ricetta_dematerializzata_dll.Services
                 _config.Password,
                 _config.PathCertificatoSsl,
                 _config.PathCertificatoCA,
-                _config.IgnoraErroriSsl);
+                _config.IgnoraErroriSsl,
+                _config.Ambiente);
         }
 
         /// <summary>
@@ -66,11 +66,11 @@ namespace ricetta_dematerializzata_dll.Services
             {
                 Username        = username,
                 Password        = password,
-                Ambiente        = (AmbienteSanita)ambiente,
+                Ambiente        = (ServiceEnvironment)ambiente,
                 IgnoraErroriSsl = ignoraSsl
             };
             _httpClient = new SoapHttpClient(
-                username, password, null, null, ignoraSsl);
+                username, password, null, null, ignoraSsl, (ServiceEnvironment)ambiente);
         }
 
         public void ConfiguraAuthorization2F(string? authorization2F)
@@ -98,7 +98,8 @@ namespace ricetta_dematerializzata_dll.Services
                 _config.Username, _config.Password,
                 _config.PathCertificatoSsl,
                 _config.PathCertificatoCA,
-                _config.IgnoraErroriSsl);
+                _config.IgnoraErroriSsl,
+                _config.Ambiente);
         }
 
         // ── Metodo principale ─────────────────────────────────────────────────────
@@ -123,39 +124,41 @@ namespace ricetta_dematerializzata_dll.Services
         /// <summary>Overload tipizzato per uso da C#.</summary>
         public string Chiama(DigitalPrescriptionService servizio, string parametriInput)
         {
+            // I servizi A2F non devono passare per PrescriptionClient
+            if (servizio == DigitalPrescriptionService.CreateAuth ||
+                servizio == DigitalPrescriptionService.RevokeAuth ||
+                servizio == DigitalPrescriptionService.CheckToken)
+                return ParserKV.BuildErrore(9999, "Usare Auth2FClient per i servizi di autenticazione A2F (Create/Revoke/CheckToken).");
+
             try
             {
                 ValidaConfigurazione();
-                var config = _config!;
+                var config     = _config!;
                 var httpClient = _httpClient!;
 
                 // 1. Parse input
-                var dictInput = ParserKV.Parse(parametriInput);
-
-                // 1.1 Mapping chiavi verso nomi canonici WSDL + validazione obbligatori
+                var dictInput    = ParserKV.Parse(parametriInput);
                 var dictCanonico = InputMapperService.NormalizeAndValidate(servizio, dictInput);
 
-                // 2. Cifratura automatica CF e pincode con certificato SanitelCF-2024-2027.cer
+                // 2. Cifratura automatica CF e pincode
                 CifraParametriSensibili(dictCanonico);
 
-                // 3. Recupera info endpoint dal catalogo
-                var endpoint   = ServicesCatalog.Ottieni(servizio);
-                var url        = endpoint.GetUrl(config.Ambiente);
-                var soapAction = endpoint.SoapAction;
-                var operazione = endpoint.OperazioneWsdl;
+                // 3. Recupera info endpoint
+                var endpoint      = ServicesCatalog.Ottieni(servizio);
+                var url           = endpoint.GetUrl(config.Ambiente);
+                var soapAction    = endpoint.SoapAction;
+                var operazione    = endpoint.OperazioneWsdl;
                 var namespaceSoap = ServicesCatalog.OttieniNamespaceSoap(servizio);
 
                 // 4. Costruisce SOAP envelope
-                var envelope = SoapHelper.BuildSoapEnvelope(
-                    operazione, namespaceSoap, dictCanonico);
+                var envelope = SoapHelper.BuildSoapEnvelope(operazione, namespaceSoap, dictCanonico);
 
-                // 5. Chiamata HTTP
-                var authorization2F = CreaAuthorization2F();
+                // 5. Chiamata HTTP con Authorization2F
+                var authorization2F = CreaAuthorization2F(servizio);
                 var xmlRisposta = httpClient.ChiamaServizio(url, soapAction, envelope, authorization2F);
 
-                // 6. Parse risposta → dizionario → stringa KV
+                // 6. Parse risposta
                 var dictOutput = SoapHelper.ParseSoapResponse(xmlRisposta);
-
                 return ParserKV.Build(dictOutput);
             }
             catch (Exception ex)
@@ -277,6 +280,30 @@ namespace ricetta_dematerializzata_dll.Services
             }
         }
 
+        /// <summary>
+        /// Trasforma il parametro "identificativo" (semplice) in struttura annidata
+        /// "identificativo_tipo" e "identificativo_valore" per supportare il WSDL.
+        /// 
+        /// Input:  identificativo = "LsQiYtf7..." (cifrato Base64)
+        /// Output: identificativo_tipo = "P"
+        ///         identificativo_valore = "LsQiYtf7..."
+        /// </summary>
+        private void EspandiIdentificativo(Dictionary<string, string> dict)
+        {
+            // Se è già espanso, non fare nulla
+            if (dict.ContainsKey("identificativo_tipo") || dict.ContainsKey("identificativo_valore"))
+                return;
+
+            // Se non c'è identificativo semplice, non fare nulla
+            if (!dict.TryGetValue("identificativo", out var valore) || string.IsNullOrWhiteSpace(valore))
+                return;
+
+            // Rimuovi il parametro semplice e espandi
+            dict.Remove("identificativo");
+            dict["identificativo_tipo"] = "P";        // P = PinCode (default)
+            dict["identificativo_valore"] = valore;   // Il valore cifrato
+        }
+
         private bool ContieneCampiSensibili(Dictionary<string, string> dict)
             => dict.ContainsKey("CODICE_FISCALE_ASSISTITO")
                || dict.ContainsKey("CF_ASSISTITO")
@@ -311,25 +338,37 @@ namespace ricetta_dematerializzata_dll.Services
                        s, @"^[a-zA-Z0-9\+/]*={0,3}$", System.Text.RegularExpressions.RegexOptions.None);
         }
 
-        private string? CreaAuthorization2F()
+        private string? CreaAuthorization2F(DigitalPrescriptionService servizio)
         {
             if (_config == null)
                 return null;
 
-            var valore = _config.Authorization2F;
-
-            if (_config.Ambiente == AmbienteSanita.Test)
-                valore = Authorization2FTestFisso;
-
-            if (string.IsNullOrWhiteSpace(valore))
+            // In ambiente di test il token A2F reale non è accettato dai servizi DEM.
+            // Se Authorization2F è già valorizzato (es. dalla form con la formula corretta) usalo.
+            // Altrimenti genera automaticamente con la formula documentata usando il ruolo del servizio.
+            if (_config.Ambiente == ServiceEnvironment.Test)
             {
-                throw new InvalidOperationException("Authorization2F (ID-SESSIONE) obbligatorio in Produzione.");
+                var valore = _config.Authorization2F?.Trim();
+                if (!string.IsNullOrWhiteSpace(valore))
+                    return valore.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                        ? valore
+                        : $"Bearer {valore}";
+
+                // Fallback automatico
+                var ruolo = IsServizioErogatore(servizio) ? "EROGATORE" : "PRESCRITTORE";
+                var now   = DateTime.Now;
+                return $"Bearer {_config.Username}-{now.Year}-{now.Month:D2}-RICETTA-DEM-{ruolo}";
             }
 
-            valore = valore.Trim();
-            return valore.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
-                ? valore
-                : $"Bearer {valore}";
+            // In produzione usa il token reale ottenuto dall'A2F
+            var prod = _config.Authorization2F?.Trim();
+            if (string.IsNullOrWhiteSpace(prod))
+                throw new InvalidOperationException(
+                    "Authorization2F (ID-SESSIONE) obbligatorio in produzione. Eseguire prima Create Token nella tab A2F.");
+
+            return prod.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase)
+                ? prod
+                : $"Bearer {prod}";
         }
 
         private static bool IsServizioErogatore(DigitalPrescriptionService servizio)
@@ -352,3 +391,4 @@ namespace ricetta_dematerializzata_dll.Services
             => s.Replace("\\", "\\\\").Replace("\"", "\\\"");
     }
 }
+

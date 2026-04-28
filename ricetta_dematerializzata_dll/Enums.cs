@@ -146,7 +146,7 @@ namespace ricetta_dematerializzata_dll.Models
     /// <summary>
     /// Ambiente di destinazione per le chiamate al servizio.
     /// </summary>
-    public enum AmbienteSanita
+    public enum ServiceEnvironment
     {
         /// <summary>Ambiente di test/collaudo (demservicetest.sanita.finanze.it)</summary>
         Test = 0,

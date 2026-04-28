@@ -65,7 +65,7 @@ namespace ricetta_dematerializzata_dll.Services
                 {
                     Username               = username,
                     Password               = password,
-                    Ambiente               = (AmbienteSanita)ambiente,
+                    Ambiente               = (ServiceEnvironment)ambiente,
                     IgnoraErroriSsl        = ignoraSsl,
                     PathCertificatoSanitel = pathSanitel
                 };

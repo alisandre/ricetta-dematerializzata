@@ -20,6 +20,9 @@
   <ItemGroup>
     <Reference Include="System.Web.Services" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,7 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="docs\" />
     <Folder Include="certificates\" />
     <Folder Include="wsdl\a2f\" />
   </ItemGroup>

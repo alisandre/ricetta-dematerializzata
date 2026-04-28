@@ -20,7 +20,7 @@ namespace ricetta_dematerializzata_dll.Core
         // ── Ambiente ──────────────────────────────────────────────────────────────
 
         /// <summary>Test o Produzione (default: Test)</summary>
-        public AmbienteSanita Ambiente { get; set; } = AmbienteSanita.Test;
+        public ServiceEnvironment Ambiente { get; set; } = ServiceEnvironment.Test;
 
         // ── Certificati SSL ───────────────────────────────────────────────────────
 
@@ -77,7 +77,7 @@ namespace ricetta_dematerializzata_dll.Core
             {
                 Username       = username,
                 Password       = password,
-                Ambiente       = AmbienteSanita.Test,
+                Ambiente       = ServiceEnvironment.Test,
                 IgnoraErroriSsl = true
             };
 
@@ -94,7 +94,7 @@ namespace ricetta_dematerializzata_dll.Core
             {
                 Username               = username,
                 Password               = password,
-                Ambiente               = AmbienteSanita.Produzione,
+                Ambiente               = ServiceEnvironment.Produzione,
                 PathCertificatoSsl     = pathCertSsl,
                 PathCertificatoCA      = pathCertCA,
                 PathCertificatoSanitel = pathSanitel,
@@ -114,7 +114,7 @@ namespace ricetta_dematerializzata_dll.Core
             if (string.IsNullOrWhiteSpace(Password))
                 throw new System.ArgumentException("Password obbligatoria.", nameof(Password));
 
-            if (Ambiente == AmbienteSanita.Produzione && !IgnoraErroriSsl)
+            if (Ambiente == ServiceEnvironment.Produzione && !IgnoraErroriSsl)
             {
                 if (string.IsNullOrEmpty(PathCertificatoSsl) || !File.Exists(PathCertificatoSsl))
                     throw new System.ArgumentException(

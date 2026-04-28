@@ -130,6 +130,9 @@ namespace ricetta_dematerializzata_dll.Core
             [DigitalPrescriptionService.CreateAuth] = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["USERID"] = "userId",
+                ["IDENTIFICATIVO"] = "identificativo",
+                ["IDENTIFICATIVO_TIPO"] = "identificativo_tipo",
+                ["IDENTIFICATIVO_VALORE"] = "identificativo_valore",
                 ["CFUTENTE"] = "cfUtente",
                 ["CODREGIONE"] = "codRegione",
                 ["CODASLAO"] = "codAslAo",
@@ -142,7 +145,14 @@ namespace ricetta_dematerializzata_dll.Core
             [DigitalPrescriptionService.RevokeAuth] = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["USERID"] = "userId",
+                ["IDENTIFICATIVO"] = "identificativo",
+                ["IDENTIFICATIVO_TIPO"] = "identificativo_tipo",
+                ["IDENTIFICATIVO_VALORE"] = "identificativo_valore",
                 ["CFUTENTE"] = "cfUtente",
+                ["CODREGIONE"] = "codRegione",
+                ["CODASLAO"] = "codAslAo",
+                ["CODSSA"] = "codSsa",
+                ["CODICESTRUTTURA"] = "codiceStruttura",
                 ["TOKEN"] = "token",
                 ["CONTESTO"] = "contesto",
                 ["APPLICAZIONE"] = "applicazione"
@@ -151,7 +161,14 @@ namespace ricetta_dematerializzata_dll.Core
             [DigitalPrescriptionService.CheckToken] = new(StringComparer.OrdinalIgnoreCase)
             {
                 ["USERID"] = "userId",
+                ["IDENTIFICATIVO"] = "identificativo",
+                ["IDENTIFICATIVO_TIPO"] = "identificativo_tipo",
+                ["IDENTIFICATIVO_VALORE"] = "identificativo_valore",
                 ["CFUTENTE"] = "cfUtente",
+                ["CODREGIONE"] = "codRegione",
+                ["CODASLAO"] = "codAslAo",
+                ["CODSSA"] = "codSsa",
+                ["CODICESTRUTTURA"] = "codiceStruttura",
                 ["TOKEN"] = "token",
                 ["CONTESTO"] = "contesto",
                 ["APPLICAZIONE"] = "applicazione"

@@ -11,13 +11,14 @@ namespace ricetta_dematerializzata_dll.Core
     internal static class ServicesCatalog
     {
         // ── URL base ──────────────────────────────────────────────────────────────
-        private const string BaseTest  = "https://demservicetest.sanita.finanze.it";
-        private const string BaseProd  = "https://demservice.sanita.finanze.it";
-        private const string BaseA2f   = "https://servizits.sanita.finanze.it";
+        private const string BaseTest    = "https://demservicetest.sanita.finanze.it";
+        private const string BaseProd    = "https://demservice.sanita.finanze.it";
+        private const string BaseA2fTest = "https://servizitstest.sanita.finanze.it";
+        private const string BaseA2fProd = "https://servizits.sanita.finanze.it";
 
-        // Namespace SOAP comune (il server usa questo per il SOAPAction)
-        private const string NsSoap = "http://invioprescritto.wsdl.dem.sanita.finanze.it";
-        private const string NsA2f  = "http://wsdl.auth.a2f.sts.sanita.finanze.it";
+        // Namespace SOAP
+        private const string NsA2fSoapAction = "http://wsdl.auth.a2f.sts.sanita.finanze.it";       // per SOAPAction HTTP
+        private const string NsA2fEnvelope  = "http://authservice.xsd.wsdl.auth.a2f.sts.sanita.finanze.it"; // per xmlns:aut nell'XML
 
         // ── Descrittore di un singolo endpoint ───────────────────────────────────
         internal class EndpointInfo
@@ -33,18 +34,23 @@ namespace ricetta_dematerializzata_dll.Core
 
             public bool UsaBaseA2f { get; }
 
-            public EndpointInfo(string pathRelativo, string soapAction, string operazioneWsdl, bool usaBaseA2f = false)
+            public string? NamespaceSoap { get; }
+
+            public EndpointInfo(string pathRelativo, string soapAction, string operazioneWsdl, bool usaBaseA2f = false, string? namespaceSoap = null)
             {
                 PathRelativo   = pathRelativo;
                 SoapAction     = soapAction;
                 OperazioneWsdl = operazioneWsdl;
                 UsaBaseA2f     = usaBaseA2f;
+                NamespaceSoap  = namespaceSoap;
             }
 
-            public string GetUrl(AmbienteSanita ambiente)
-                => UsaBaseA2f
-                    ? BaseA2f + PathRelativo
-                    : (ambiente == AmbienteSanita.Test ? BaseTest : BaseProd) + PathRelativo;
+            public string GetUrl(ServiceEnvironment ambiente)
+            {
+                if (UsaBaseA2f)
+                    return (ambiente == ServiceEnvironment.Test ? BaseA2fTest : BaseA2fProd) + PathRelativo;
+                return (ambiente == ServiceEnvironment.Test ? BaseTest : BaseProd) + PathRelativo;
+            }
         }
 
         // ── Dizionario principale ─────────────────────────────────────────────────
@@ -54,102 +60,117 @@ namespace ricetta_dematerializzata_dll.Core
             // ── PRESCRITTORE ─────────────────────────────────────────────────────
             [DigitalPrescriptionService.VisualizzaPrescritto] = new EndpointInfo(
                 "/DemRicettaPrescrittoServicesWeb/services/demVisualizzaPrescritto",
-                $"{NsSoap}/VisualizzaPrescritto",
-                "VisualizzaPrescritto"),
+                "http://visualizzaprescritto.wsdl.dem.sanita.finanze.it/VisualizzaPrescritto",
+                "VisualizzaPrescrittoRichiesta",
+                namespaceSoap: "http://visualizzaprescrittorichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.InvioPrescritto] = new EndpointInfo(
                 "/DemRicettaPrescrittoServicesWeb/services/demInvioPrescritto",
-                $"{NsSoap}/InvioPrescritto",
-                "InvioPrescritto"),
+                "http://invioprescritto.wsdl.dem.sanita.finanze.it/InvioPrescritto",
+                "InvioPrescritto",
+                namespaceSoap: "http://invioprescrittorichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.AnnullaPrescritto] = new EndpointInfo(
                 "/DemRicettaPrescrittoServicesWeb/services/demAnnullaPrescritto",
-                $"{NsSoap}/AnnullaPrescritto",
-                "AnnullaPrescritto"),
+                "http://annullaprescritto.wsdl.dem.sanita.finanze.it/AnnullaPrescritto",
+                "AnnullaPrescritto",
+                namespaceSoap: "http://annullaprescrittorichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.InterrogaNreUtilizzati] = new EndpointInfo(
                 "/DemRicettaInterrogazioniServicesWeb/services/demInterrogaNreUtilizzati",
-                $"{NsSoap}/InterrogaNreUtilizzati",
-                "InterrogaNreUtilizzati"),
+                "http://interroganreassociati.wsdl.dem.sanita.finanze.it/InterrogaNreUtilizzati",
+                "InterrogaNreUtilizzati",
+                namespaceSoap: "http://interroganreutilrichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.ServiceAnagPrescrittore] = new EndpointInfo(
                 "/DemRicettaServiceAnagServicesWeb/services/demServiceAnag",
-                $"{NsSoap}/ServiceAnag",
-                "ServiceAnag"),
+                "http://serviceanag.wsdl.dem.sanita.finanze.it/ServiceAnag",
+                "ServiceAnag",
+                namespaceSoap: "http://serviceanagrichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.InvioDichiarazioneSostituzioneMedico] = new EndpointInfo(
                 "/DemRicettaServiceMedicoWeb/services/invioDichiarazioneSostituzioneMedico",
-                $"{NsSoap}/InvioDichiarazioneSostituzioneMedico",
-                "InvioDichiarazioneSostituzioneMedico"),
+                "http://dichiarazionesostituzionemedico.wsdl.dem.sanita.finanze.it/DichiarazioneSostituzioneMedico",
+                "InvioDichiarazioneSostituzioneMedico",
+                namespaceSoap: "http://dichiarazionesostituzionemedicorichiesta.xsd.dem.sanita.finanze.it"),
 
             // ── EROGATORE ────────────────────────────────────────────────────────
             [DigitalPrescriptionService.InvioErogato] = new EndpointInfo(
                 "/DemRicettaErogatoServicesWeb/services/demInvioErogato",
-                $"{NsSoap}/InvioErogato",
-                "InvioErogato"),
+                "http://invioerogato.wsdl.dem.sanita.finanze.it/InvioErogato",
+                "InvioErogato",
+                namespaceSoap: "http://invioerogatorichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.VisualizzaErogato] = new EndpointInfo(
                 "/DemRicettaErogatoServicesWeb/services/demVisualizzaErogato",
-                $"{NsSoap}/VisualizzaErogato",
-                "VisualizzaErogato"),
+                "http://visualizzaerogato.wsdl.dem.sanita.finanze.it/VisualizzaErogato",
+                "VisualizzaErogato",
+                namespaceSoap: "http://visualizzaerogatorichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.SospendiErogato] = new EndpointInfo(
                 "/DemRicettaErogatoServicesWeb/services/demSospendiErogato",
-                $"{NsSoap}/SospendiErogato",
-                "SospendiErogato"),
+                "http://visualizzaerogato.wsdl.dem.sanita.finanze.it/SospendiErogato",
+                "SospendiErogato",
+                namespaceSoap: "http://sospendierogatorichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.AnnullaErogato] = new EndpointInfo(
                 "/DemRicettaErogatoServicesWeb/services/demAnnullaErogato",
-                $"{NsSoap}/AnnullaErogato",
-                "AnnullaErogato"),
+                "http://annullaerogato.wsdl.dem.sanita.finanze.it/AnnullaErogato",
+                "AnnullaErogato",
+                namespaceSoap: "http://annullaerogatorichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.RicercaErogatore] = new EndpointInfo(
                 "/DemRicettaRicercaErogatoreServicesWeb/services/ricercaErogatore",
-                $"{NsSoap}/RicercaErogatore",
-                "RicercaErogatore"),
+                "http://demricettaricercaerogatore.wsdl.dem.sanita.finanze.it/elencoRicette",
+                "RicercaErogatore",
+                namespaceSoap: "http://elencoricetterichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.ReportErogatoMensile] = new EndpointInfo(
                 "/DemRicettaReportServicesWeb/services/demReportErogatoMensile",
-                $"{NsSoap}/ReportErogatoMensile",
-                "ReportErogatoMensile"),
+                "http://reporterogatomensile.wsdl.dem.sanita.finanze.it/ReportErogatoMensile",
+                "ReportErogatoMensile",
+                namespaceSoap: "http://reporterogatomensilerichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.ServiceAnagErogatore] = new EndpointInfo(
                 "/DemRicettaServiceAnagServicesWeb/services/demServiceAnag",
-                $"{NsSoap}/ServiceAnag",
-                "ServiceAnag"),
+                "http://serviceanag.wsdl.dem.sanita.finanze.it/ServiceAnag",
+                "ServiceAnag",
+                namespaceSoap: "http://serviceanagrichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.RicettaDifferita] = new EndpointInfo(
                 "/DemRicettaDifferitaServicesWeb/services/ricettaDifferita",
-                $"{NsSoap}/RicettaDifferita",
-                "RicettaDifferita"),
+                "http://demricettadifferita.wsdl.dem.sanita.finanze.it/invioSegnalazione",
+                "RicettaDifferita",
+                namespaceSoap: "http://inviosegnalazionerichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.AnnullaErogatoDiff] = new EndpointInfo(
                 "/DemRicettaDifferitaServicesWeb/services/annullaErogatoDiff",
-                $"{NsSoap}/AnnullaErogatoDiff",
-                "AnnullaErogatoDiff"),
+                "http://demannullaerogatodiff.wsdl.dem.sanita.finanze.it/annullaErogatoDiff",
+                "AnnullaErogatoDiff",
+                namespaceSoap: "http://annullaerogatodiffrichiesta.xsd.dem.sanita.finanze.it"),
 
             [DigitalPrescriptionService.RicevuteSac] = new EndpointInfo(
                 "/DemRicettaServiceRicevuteWeb/services/ricevuteSac",
-                $"{NsSoap}/RicevuteSac",
+                "http://invioprescritto.wsdl.dem.sanita.finanze.it/RicevuteSac",
                 "RicevuteSac"),
 
             // ── AUTHORIZATION 2F (A2F) ─────────────────────────────────────────────
             [DigitalPrescriptionService.CreateAuth] = new EndpointInfo(
                 "/a2f-auth-ws/soap/v1/authentication-service",
-                $"{NsA2f}/create",
-                "create",
+                $"{NsA2fSoapAction}/create",
+                "CreateAuthReq",
                 usaBaseA2f: true),
 
             [DigitalPrescriptionService.RevokeAuth] = new EndpointInfo(
                 "/a2f-auth-ws/soap/v1/authentication-service",
-                $"{NsA2f}/revoke",
-                "revoke",
+                $"{NsA2fSoapAction}/revoke",
+                "RevokeAuthReq",
                 usaBaseA2f: true),
 
             [DigitalPrescriptionService.CheckToken] = new EndpointInfo(
                 "/a2f-auth-ws/soap/v1/authentication-service",
-                $"{NsA2f}/checkToken",
-                "checkToken",
+                $"{NsA2fSoapAction}/checkToken",
+                "CheckTokenReq",
                 usaBaseA2f: true),
         };
 
@@ -164,19 +185,29 @@ namespace ricetta_dematerializzata_dll.Core
             return info;
         }
 
-        public static string OttieniUrl(DigitalPrescriptionService servizio, AmbienteSanita ambiente)
+        public static string OttieniUrl(DigitalPrescriptionService servizio, ServiceEnvironment ambiente)
             => Ottieni(servizio).GetUrl(ambiente);
 
         public static string OttieniSoapAction(DigitalPrescriptionService servizio)
             => Ottieni(servizio).SoapAction;
 
         public static string OttieniNamespaceSoap(DigitalPrescriptionService servizio)
-            => servizio switch
+        {
+            var endpoint = Ottieni(servizio);
+            if (!string.IsNullOrWhiteSpace(endpoint.NamespaceSoap))
+                return endpoint.NamespaceSoap;
+
+            return servizio switch
             {
-                DigitalPrescriptionService.CreateAuth => NsA2f,
-                DigitalPrescriptionService.RevokeAuth => NsA2f,
-                DigitalPrescriptionService.CheckToken => NsA2f,
-                _ => NsSoap
+                DigitalPrescriptionService.CreateAuth => NsA2fEnvelope,
+                DigitalPrescriptionService.RevokeAuth => NsA2fEnvelope,
+                DigitalPrescriptionService.CheckToken => NsA2fEnvelope,
+                _ => "http://invioprescritto.wsdl.dem.sanita.finanze.it"
             };
+        }
     }
 }
+
+
+
+
