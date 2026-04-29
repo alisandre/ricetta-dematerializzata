@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ricetta_dematerializzata_dll\ricetta_dematerializzata_dll.csproj" />
+    <ProjectReference Include="..\ricetta_dematerializzata\ricetta_dematerializzata.csproj" />
   </ItemGroup>
 
 </Project>
