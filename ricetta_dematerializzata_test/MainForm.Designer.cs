@@ -10,6 +10,10 @@ namespace ricetta_dematerializzata_test_ui
         private System.Windows.Forms.TextBox    _txtUsername;
         private System.Windows.Forms.Label      lblPassword;
         private System.Windows.Forms.TextBox    _txtPassword;
+        private System.Windows.Forms.Label      lblUsernameE;
+        private System.Windows.Forms.TextBox    _txtUsernameE;
+        private System.Windows.Forms.Label      lblPasswordE;
+        private System.Windows.Forms.TextBox    _txtPasswordE;
         private System.Windows.Forms.CheckBox   _chkProduzione;
 
         // ── TabControl principale ─────────────────────────────────────────────────
@@ -83,6 +87,10 @@ namespace ricetta_dematerializzata_test_ui
             this._txtUsername = new System.Windows.Forms.TextBox();
             this.lblPassword = new System.Windows.Forms.Label();
             this._txtPassword = new System.Windows.Forms.TextBox();
+            this.lblUsernameE = new System.Windows.Forms.Label();
+            this._txtUsernameE = new System.Windows.Forms.TextBox();
+            this.lblPasswordE = new System.Windows.Forms.Label();
+            this._txtPasswordE = new System.Windows.Forms.TextBox();
             this._chkProduzione = new System.Windows.Forms.CheckBox();
             this._tabControl = new System.Windows.Forms.TabControl();
             this._tabToken = new System.Windows.Forms.TabPage();
@@ -151,7 +159,7 @@ namespace ricetta_dematerializzata_test_ui
             this.lblUsername.Name = "lblUsername";
             this.lblUsername.Size = new System.Drawing.Size(70, 20);
             this.lblUsername.TabIndex = 0;
-            this.lblUsername.Text = "Username";
+            this.lblUsername.Text = "User Presc.";
             // 
             // _txtUsername
             // 
@@ -166,7 +174,7 @@ namespace ricetta_dematerializzata_test_ui
             this.lblPassword.Name = "lblPassword";
             this.lblPassword.Size = new System.Drawing.Size(65, 20);
             this.lblPassword.TabIndex = 1;
-            this.lblPassword.Text = "Password";
+            this.lblPassword.Text = "Pass Presc.";
             // 
             // _txtPassword
             // 
@@ -176,12 +184,43 @@ namespace ricetta_dematerializzata_test_ui
             this._txtPassword.Size = new System.Drawing.Size(160, 20);
             this._txtPassword.TabIndex = 1;
             // 
+            // lblUsernameE
+            // 
+            this.lblUsernameE.Location = new System.Drawing.Point(12, 39);
+            this.lblUsernameE.Name = "lblUsernameE";
+            this.lblUsernameE.Size = new System.Drawing.Size(70, 20);
+            this.lblUsernameE.TabIndex = 2;
+            this.lblUsernameE.Text = "User Erog.";
+            // 
+            // _txtUsernameE
+            // 
+            this._txtUsernameE.Location = new System.Drawing.Point(85, 36);
+            this._txtUsernameE.Name = "_txtUsernameE";
+            this._txtUsernameE.Size = new System.Drawing.Size(180, 20);
+            this._txtUsernameE.TabIndex = 3;
+            // 
+            // lblPasswordE
+            // 
+            this.lblPasswordE.Location = new System.Drawing.Point(278, 39);
+            this.lblPasswordE.Name = "lblPasswordE";
+            this.lblPasswordE.Size = new System.Drawing.Size(65, 20);
+            this.lblPasswordE.TabIndex = 4;
+            this.lblPasswordE.Text = "Pass Erog.";
+            // 
+            // _txtPasswordE
+            // 
+            this._txtPasswordE.Location = new System.Drawing.Point(346, 36);
+            this._txtPasswordE.Name = "_txtPasswordE";
+            this._txtPasswordE.PasswordChar = '●';
+            this._txtPasswordE.Size = new System.Drawing.Size(160, 20);
+            this._txtPasswordE.TabIndex = 5;
+            // 
             // _chkProduzione
             // 
-            this._chkProduzione.Location = new System.Drawing.Point(525, 12);
+            this._chkProduzione.Location = new System.Drawing.Point(525, 36);
             this._chkProduzione.Name = "_chkProduzione";
             this._chkProduzione.Size = new System.Drawing.Size(105, 20);
-            this._chkProduzione.TabIndex = 2;
+            this._chkProduzione.TabIndex = 6;
             this._chkProduzione.Text = "Produzione";
             // 
             // _tabControl
@@ -189,7 +228,7 @@ namespace ricetta_dematerializzata_test_ui
             this._tabControl.Controls.Add(this._tabToken);
             this._tabControl.Controls.Add(this._tabPrescrittore);
             this._tabControl.Controls.Add(this._tabErogatore);
-            this._tabControl.Location = new System.Drawing.Point(12, 44);
+            this._tabControl.Location = new System.Drawing.Point(12, 69);
             this._tabControl.Name = "_tabControl";
             this._tabControl.SelectedIndex = 0;
             this._tabControl.Size = new System.Drawing.Size(1040, 680);
@@ -745,6 +784,10 @@ namespace ricetta_dematerializzata_test_ui
             this.Controls.Add(this._txtUsername);
             this.Controls.Add(this.lblPassword);
             this.Controls.Add(this._txtPassword);
+            this.Controls.Add(this.lblUsernameE);
+            this.Controls.Add(this._txtUsernameE);
+            this.Controls.Add(this.lblPasswordE);
+            this.Controls.Add(this._txtPasswordE);
             this.Controls.Add(this._chkProduzione);
             this.Controls.Add(this._tabControl);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

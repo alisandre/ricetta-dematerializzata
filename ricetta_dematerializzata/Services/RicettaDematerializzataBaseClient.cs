@@ -143,11 +143,28 @@ namespace ricetta_dematerializzata.Services
         /// <summary>Overload tipizzato per uso da C#.</summary>
         public string Chiama(DigitalPrescriptionService servizio, string parametriInput)
         {
-            // I servizi A2F non devono passare per PrescriptionClient
+            // I servizi A2F devono poter essere chiamati anche via codici 20/21/22 (COM/Delphi)
             if (servizio == DigitalPrescriptionService.CreateAuth ||
                 servizio == DigitalPrescriptionService.RevokeAuth ||
                 servizio == DigitalPrescriptionService.CheckToken)
-                return ParserKV.BuildErrore(9999, "Usare Auth2FClient per i servizi di autenticazione A2F (Create/Revoke/CheckToken).");
+            {
+                try
+                {
+                    ValidaConfigurazione();
+                    var a2f = new Auth2FClient(_config!);
+                    return servizio switch
+                    {
+                        DigitalPrescriptionService.CreateAuth => a2f.Create(parametriInput),
+                        DigitalPrescriptionService.RevokeAuth => a2f.Revoke(parametriInput),
+                        DigitalPrescriptionService.CheckToken => a2f.CheckToken(parametriInput),
+                        _ => ParserKV.BuildErrore(9999, "Servizio A2F non supportato")
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return ParserKV.BuildErrore(9999, $"Eccezione client: {ex.Message}");
+                }
+            }
 
             try
             {
@@ -168,9 +185,16 @@ namespace ricetta_dematerializzata.Services
                 var soapAction    = endpoint.SoapAction;
                 var operazione    = endpoint.OperazioneWsdl;
                 var namespaceSoap = ServicesCatalog.OttieniNamespaceSoap(servizio);
-
+                var namespaceTipiDati = OttieniNamespaceTipiDati(servizio);
+ 
                 // 4. Costruisce SOAP envelope
-                var envelope = SoapHelper.BuildSoapEnvelope(operazione, namespaceSoap, dictCanonico, endpoint.PrefissoNs, endpoint.UsaDatNamespace);
+                var envelope = SoapHelper.BuildSoapEnvelope(
+                    operazione,
+                    namespaceSoap,
+                    dictCanonico,
+                    endpoint.PrefissoNs,
+                    endpoint.UsaDatNamespace,
+                    namespaceTipiDati);
 
                 // 5. Chiamata HTTP con Authorization2F
                 var authorization2F = CreaAuthorization2F(servizio);
@@ -401,6 +425,16 @@ namespace ricetta_dematerializzata.Services
                 DigitalPrescriptionService.AnnullaErogatoDiff => true,
                 DigitalPrescriptionService.RicevuteSac => true,
                 _ => false
+            };
+
+        private static string? OttieniNamespaceTipiDati(DigitalPrescriptionService servizio)
+            => servizio switch
+            {
+                DigitalPrescriptionService.ServiceAnagPrescrittore => "http://tipidatiserviceanag.xsd.dem.sanita.finanze.it",
+                DigitalPrescriptionService.ServiceAnagErogatore => "http://tipidatiserviceanag.xsd.dem.sanita.finanze.it",
+                DigitalPrescriptionService.ReportErogatoMensile => "http://tipodatireportcsv.xsd.dem.sanita.finanze.it",
+                DigitalPrescriptionService.InvioDichiarazioneSostituzioneMedico => "http://tipodatidichiarazionesostituzionemedico.xsd.dem.sanita.finanze.it",
+                _ => "http://tipodati.xsd.dem.sanita.finanze.it"
             };
 
         private static string Escape(string s)

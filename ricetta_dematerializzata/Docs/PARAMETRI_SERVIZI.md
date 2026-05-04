@@ -145,6 +145,9 @@ Legenda:
 ## Erogatore
 
 ### 10. InvioErogato
+
+> Nota di processo: `InvioErogato` è la conferma di erogazione. Per la presa in carico/blocco ricetta usare prima `VisualizzaErogato` (`tipoOperazione=1`).
+
 | Parametro | Obbl. | Alias | Descrizione XSD |
 |---|---|---|---|
 | `pinCode` | sì | `PINCODE` | PinCode inviante |
@@ -208,6 +211,9 @@ Legenda:
 ---
 
 ### 11. VisualizzaErogato
+
+> Nota di processo: `VisualizzaErogato` è il servizio di presa in carico (blocco ricetta). Dopo esito positivo, il flusso prosegue con `InvioErogato` per confermare l'erogazione.
+
 | Parametro | Obbl. | Alias | Descrizione XSD |
 |---|---|---|---|
 | `pinCode` | sì | `PINCODE` | PinCode inviante |

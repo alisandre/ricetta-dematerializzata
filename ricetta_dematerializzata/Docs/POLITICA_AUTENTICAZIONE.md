@@ -30,6 +30,10 @@ La libreria seleziona automaticamente il metodo di autenticazione in base al ser
 
 ### 3. Servizi Erogatore
 
+Nota operativa di processo:
+- `VisualizzaErogato` (ID 11) è la chiamata di presa in carico/blocco ricetta.
+- `InvioErogato` (ID 10) è la conferma delle prestazioni erogate successiva alla presa in carico.
+
 | Servizio | ID | Autenticazione | SSL client | Validazione CA |
 |----------|----|----------------|------------|----------------|
 | InvioErogato | 10 | Basic Auth + SSL | Sì (se seriale) | No |
@@ -91,4 +95,5 @@ client.Chiama(SRV_INVIO_PRESCRITTO, "pinCode=...;nre=...")
   4. Prepara richiesta HTTPS con Basic Auth + eventuale certificato client
   5. In produzione: valida CA del server (solo prescrittore)
   6. Invia SOAP → restituisce risposta key=value
+
 

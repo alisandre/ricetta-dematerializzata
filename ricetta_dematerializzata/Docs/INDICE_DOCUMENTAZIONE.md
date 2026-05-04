@@ -36,10 +36,13 @@ Questo indice raccoglie i documenti realmente utili dopo il consolidamento della
    - simulazione processo applicativo Delphi esterno,
    - riuso token medico in memoria,
    - `CheckToken` → `CreateAuth` se necessario,
-   - `InvioPrescritto` finale.
+   - chiamate A2F via `Chiama(20/21/22)`,
+   - `InvioPrescritto` finale,
+   - flusso erogatore: `VisualizzaErogato` (presa in carico) → `InvioErogato` (conferma erogazione).
 
 7. **A2F_COMPENDIO.md**
    - documento unico per CreateAuth / RevokeAuth / CheckToken,
+   - invocazione esterna via `Chiama(20/21/22)`,
    - esempi KV,
    - checklist test minima.
 
@@ -80,6 +83,7 @@ Leggere:
 - Interfacciamento Delphi esterno (`RicettaDematerializzata.Client`, `IRicettaDematerializzataClient`, `TRicettaDematerializzataClient`)
 - Gestione token A2F medico
 - Invio prescrizione con `InvioPrescritto`
+- Flusso erogatore con presa in carico (`VisualizzaErogato`) e conferma (`InvioErogato`)
 - Input KV strutturati per nodi array SOAP
 - Parametri obbligatori e alias di ogni servizio
 
@@ -126,3 +130,5 @@ begin
   ShowMessage(client.Chiama(SRV_INVIO_PRESCRITTO, 'pinCode=...;nre=...'));
   client.Free;
 end;
+
+

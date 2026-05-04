@@ -53,7 +53,13 @@ namespace ricetta_dematerializzata.Services
                 var operazione = endpoint.OperazioneWsdl;
                 var namespaceSoap = ServicesCatalog.OttieniNamespaceSoap(servizio);
 
-                var envelope = SoapHelper.BuildSoapEnvelope(operazione, namespaceSoap, dictCanonico, endpoint.PrefissoNs, endpoint.UsaDatNamespace);
+                var envelope = SoapHelper.BuildSoapEnvelope(
+                    operazione,
+                    namespaceSoap,
+                    dictCanonico,
+                    endpoint.PrefissoNs,
+                    endpoint.UsaDatNamespace,
+                    "http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it");
                 var xmlRisposta = _httpClient.ChiamaServizio(url, soapAction, envelope, null, false, false);
 
                 var dictOutput = SoapHelper.ParseSoapResponse(xmlRisposta);

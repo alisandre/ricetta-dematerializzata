@@ -54,6 +54,10 @@ ProgID COM esposto:
 - `TestConnessione(servizio)`
 - `CifraConSanitel(testoPiano)`
 
+Nota importante:
+- I servizi A2F (`CreateAuth`, `RevokeAuth`, `CheckToken`) sono invocabili dall'esterno con `Chiama(...)` usando i codici `20/21/22`.
+- L'instradamento interno verso il client A2F è trasparente.
+
 ### Politica SSL automatica:
 
 | Ambiente | SSL validation |
@@ -63,7 +67,7 @@ ProgID COM esposto:
 
 ### Politica di autenticazione per servizio:
 
-- **Servizi token (A2F)**: CreateAuth, RevokeAuth, CheckToken → sempre **Basic Auth** (username/password)
+- **Servizi token (A2F, ID 20/21/22 via `Chiama`)**: sempre **Basic Auth** (username/password)
 - **Servizi prescrittore/erogatore**: tutti gli altri → **SSL con certificato client** (se seriale configurato) + Basic Auth
 
 ## 4) Delphi (unit helper)
@@ -90,8 +94,9 @@ begin
     // Produzione con certificato client dal Certificate Store
     C.Configura('utente', 'password', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE);
 
-    // Token A2F (Basic Auth automatica)
-    OutKv := C.Chiama(SRV_CREATE_AUTH, 'identificativo_tipo=P;identificativo_valore=...');
+    // Token A2F via Chiama(SRV_CREATE_AUTH=20)
+    OutKv := C.Chiama(SRV_CREATE_AUTH,
+      'userId=PROVAX00X00X000Y;cfUtente=PROVAX00X00X000Y;contesto=RICETTA-DEM;applicazione=PRESCRITTORE');
     C.ConfiguraAuthorization2F(KVGet(OutKv, 'MESSAGGIO'));
 
     // Servizio prescrittore (SSL automatico)
@@ -139,7 +144,32 @@ ElencoDettagliPrescrizioni_1_codProdPrest=891011;
 ElencoDettagliPrescrizioni_1_quantita=1
 ```
 
-## 6) Nota sicurezza e certificato Sanitel
+## 6) Flusso erogatore consigliato
+
+Per la presa in carico ricetta non usare direttamente `InvioErogato`.
+Il flusso consigliato è:
+
+1. `SRV_VISUALIZZA_EROGATO` con `tipoOperazione=1` (presa in carico / blocco ricetta)
+2. `SRV_INVIO_EROGATO` (conferma prestazioni erogate)
+
+Esempio Delphi sintetico:
+
+```pascal
+var
+  OutVisualizza, OutInvio: string;
+begin
+  OutVisualizza := C.Chiama(SRV_VISUALIZZA_EROGATO,
+    'pinCode=TSTSIC00B01H501E;codiceRegioneErogatore=190;codiceAslErogatore=201;' +
+    'codiceSsaErogatore=888888;nre=1900A4005322015;tipoOperazione=1;cfAssistito=GLLGNN37B51C286O');
+
+  OutInvio := C.Chiama(SRV_INVIO_EROGATO,
+    'pinCode=TSTSIC00B01H501E;codiceRegioneErogatore=190;codiceAslErogatore=201;' +
+    'codiceSsaErogatore=888888;pwd=TSTSIC00B01H501E;nre=1900A4005322015;cfAssistito=GLLGNN37B51C286O;' +
+    'tipoOperazione=1;prescrizioneFruita=1;dataSpedizione=2026-01-01 10:00:00');
+end;
+```
+
+## 7) Nota sicurezza e certificato Sanitel
 
 Nel progetto ricetta_dematerializzata:
 - `pinCode` e `cfAssistito` vengono cifrati automaticamente con il certificato Sanitel
@@ -148,7 +178,7 @@ Nel progetto ricetta_dematerializzata:
 
 Non è possibile configurare un percorso diverso per il certificato Sanitel.
 
-## 7) Configurazione certificato SSL client
+## 8) Configurazione certificato SSL client
 
 Il certificato client SSL viene specificato tramite il **seriale** nel Windows Certificate Store:
 

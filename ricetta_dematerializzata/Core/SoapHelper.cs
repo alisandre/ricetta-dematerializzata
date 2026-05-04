@@ -81,6 +81,11 @@ namespace ricetta_dematerializzata.Core
                 "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore",
                 "pwd", "nre", "cfAssistito", "tipoOperazione"
             },
+            ["VisualizzaErogatoRichiesta"] = new[]
+            {
+                "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore",
+                "pwd", "nre", "cfAssistito", "tipoOperazione"
+            },
             ["SospendiErogato"] = new[]
             {
                 "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore",
@@ -149,35 +154,19 @@ namespace ricetta_dematerializzata.Core
             string namespaceSoap,
             Dictionary<string, string> parametri,
             string? prefissoNsOverride = null,
-            bool usaDatNamespace = true)
+            bool usaDatNamespace = true,
+            string? namespaceTipiDatiOverride = null,
+            string? prefissoTipiDatiOverride = null)
         {
-            var sb = new StringBuilder();
-            sb.Append("<soapenv:Envelope");
-            sb.Append(" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"");
-
             bool isA2f = namespaceSoap.Contains("a2f") || namespaceSoap.Contains("auth");
 
             // Usa il prefisso fornito dall'endpoint; fallback euristico per compatibilità
             string prefissoNs = prefissoNsOverride ?? (isA2f ? "aut" : "tns");
-
-            sb.AppendFormat(" xmlns:{0}=\"{1}\"", prefissoNs, namespaceSoap);
-
-            if (isA2f)
-            {
-                sb.Append(" xmlns:dat=\"http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it\"");
-            }
-            else
-            {
-                if (usaDatNamespace)
-                    sb.Append(" xmlns:dat=\"http://datischema.wsdl.dem.sanita.finanze.it\"");
-                sb.Append(" xmlns:tip=\"http://tipodati.xsd.dem.sanita.finanze.it\"");
-            }
-
-            sb.Append(">");
-
-            sb.Append("<soapenv:Header/>");
-            sb.Append("<soapenv:Body>");
-            sb.AppendFormat("<{0}:{1}>", prefissoNs, operazione);
+            string prefissoTipiDati = prefissoTipiDatiOverride ?? (isA2f ? "dt" : "tip");
+            string namespaceTipiDati = namespaceTipiDatiOverride
+                                        ?? (isA2f
+                                            ? "http://datatype.xsd.wsdl.auth.a2f.sts.sanita.finanze.it"
+                                            : "http://tipodati.xsd.dem.sanita.finanze.it");
 
             // Raggruppa i parametri per elemento
             var elementiAnnidati = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
@@ -237,6 +226,43 @@ namespace ricetta_dematerializzata.Core
                 }
             }
 
+            bool includeTipiDatiNs = elementiAnnidati.Count > 0;
+            bool hasDettagliPrescrizioni =
+                dettagliPrescrizioniRaw.Count > 0 ||
+                string.Equals(dettagliPrescrizioniLegacy?.Trim(), "DETTAGLIO_MINIMO", StringComparison.OrdinalIgnoreCase);
+            bool hasDettagliInvioErogato =
+                dettagliInvioErogatoRaw.Count > 0 ||
+                string.Equals(dettagliInvioErogatoLegacy?.Trim(), "DETTAGLIO_MINIMO", StringComparison.OrdinalIgnoreCase);
+
+            if (string.Equals(operazione, "InvioPrescritto", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(operazione, "InvioPrescrittoRichiesta", StringComparison.OrdinalIgnoreCase))
+            {
+                includeTipiDatiNs |= hasDettagliPrescrizioni;
+            }
+
+            if (string.Equals(operazione, "InvioErogato", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(operazione, "InvioErogatoRichiesta", StringComparison.OrdinalIgnoreCase))
+            {
+                includeTipiDatiNs |= hasDettagliInvioErogato;
+            }
+
+            if (!usaDatNamespace)
+            {
+                includeTipiDatiNs = includeTipiDatiNs && (elementiAnnidati.Count > 0 || hasDettagliPrescrizioni || hasDettagliInvioErogato);
+            }
+
+            var sb = new StringBuilder();
+            sb.Append("<soapenv:Envelope");
+            sb.Append(" xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"");
+            sb.AppendFormat(" xmlns:{0}=\"{1}\"", prefissoNs, namespaceSoap);
+            if (includeTipiDatiNs)
+                sb.AppendFormat(" xmlns:{0}=\"{1}\"", prefissoTipiDati, namespaceTipiDati);
+            sb.Append(">");
+
+            sb.Append("<soapenv:Header/>");
+            sb.Append("<soapenv:Body>");
+            sb.AppendFormat("<{0}:{1}>", prefissoNs, operazione);
+
             // IMPORTANTE: userId e identificativo DEVONO stare per primi
             // Se presenti, scrivili subito all'inizio
             if (elementiSemplici.TryGetValue("userId", out var userIdVal) && !string.IsNullOrEmpty(userIdVal))
@@ -251,7 +277,7 @@ namespace ricetta_dematerializzata.Core
                 foreach (var kvChild in identDict)
                 {
                     var childName = kvChild.Key;
-                    sb.AppendFormat("<dat:{0}>{1}</dat:{0}>", childName, SecurityElement.Escape(kvChild.Value ?? string.Empty));
+                    sb.AppendFormat("<{0}:{1}>{2}</{0}:{1}>", prefissoTipiDati, childName, SecurityElement.Escape(kvChild.Value ?? string.Empty));
                 }
                 sb.AppendFormat("</{0}:identificativo>", prefissoNs);
                 elementiAnnidati.Remove("identificativo");
@@ -308,7 +334,7 @@ namespace ricetta_dematerializzata.Core
                 foreach (var kvChild in children)
                 {
                     var childName = kvChild.Key;
-                    sb.AppendFormat("<dat:{0}>{1}</dat:{0}>", childName, SecurityElement.Escape(kvChild.Value ?? string.Empty));
+                    sb.AppendFormat("<{0}:{1}>{2}</{0}:{1}>", prefissoTipiDati, childName, SecurityElement.Escape(kvChild.Value ?? string.Empty));
                 }
                 sb.AppendFormat("</{0}:{1}>", prefissoNs, parentName);
             }
@@ -318,14 +344,15 @@ namespace ricetta_dematerializzata.Core
             if (string.Equals(operazione, "InvioPrescritto", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(operazione, "InvioPrescrittoRichiesta", StringComparison.OrdinalIgnoreCase))
             {
-                AppendElencoDettagliPrescrizioni(sb, prefissoNs, dettagliPrescrizioniRaw, dettagliPrescrizioniLegacy);
+                AppendElencoDettagliPrescrizioni(sb, prefissoNs, prefissoTipiDati, dettagliPrescrizioniRaw, dettagliPrescrizioniLegacy);
             }
 
             // Supporto struttura annidata di demInvioErogato:
             // <ElencoDettagliPrescrInviiErogato><DettaglioPrescrizioneInvioErogato>...</DettaglioPrescrizioneInvioErogato></ElencoDettagliPrescrInviiErogato>
-            if (string.Equals(operazione, "InvioErogato", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(operazione, "InvioErogato", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(operazione, "InvioErogatoRichiesta", StringComparison.OrdinalIgnoreCase))
             {
-                AppendElencoDettagliPrescrInviiErogato(sb, prefissoNs, dettagliInvioErogatoRaw, dettagliInvioErogatoLegacy);
+                AppendElencoDettagliPrescrInviiErogato(sb, prefissoNs, prefissoTipiDati, dettagliInvioErogatoRaw, dettagliInvioErogatoLegacy);
             }
 
             sb.AppendFormat("</{0}:{1}>", prefissoNs, operazione);
@@ -414,6 +441,7 @@ namespace ricetta_dematerializzata.Core
         private static void AppendElencoDettagliPrescrizioni(
             StringBuilder sb,
             string prefissoNs,
+            string prefissoTipiDati,
             Dictionary<string, string> dettagliRaw,
             string? dettagliLegacy)
         {
@@ -476,17 +504,17 @@ namespace ricetta_dematerializzata.Core
                 if (!dettaglio.ContainsKey("quantita") || string.IsNullOrWhiteSpace(dettaglio["quantita"]))
                     dettaglio["quantita"] = "1";
 
-                sb.Append("<tip:DettaglioPrescrizione>");
+                sb.AppendFormat("<{0}:DettaglioPrescrizione>", prefissoTipiDati);
 
                 foreach (var campo in ordineCampi)
                 {
                     if (!dettaglio.TryGetValue(campo, out var valore) || string.IsNullOrWhiteSpace(valore))
                         continue;
 
-                    sb.AppendFormat("<tip:{0}>{1}</tip:{0}>", campo, SecurityElement.Escape(valore));
+                    sb.AppendFormat("<{0}:{1}>{2}</{0}:{1}>", prefissoTipiDati, campo, SecurityElement.Escape(valore));
                 }
 
-                sb.Append("</tip:DettaglioPrescrizione>");
+                sb.AppendFormat("</{0}:DettaglioPrescrizione>", prefissoTipiDati);
             }
 
             sb.AppendFormat("</{0}:ElencoDettagliPrescrizioni>", prefissoNs);
@@ -495,6 +523,7 @@ namespace ricetta_dematerializzata.Core
         private static void AppendElencoDettagliPrescrInviiErogato(
             StringBuilder sb,
             string prefissoNs,
+            string prefissoTipiDati,
             Dictionary<string, string> dettagliRaw,
             string? dettagliLegacy)
         {
@@ -560,17 +589,17 @@ namespace ricetta_dematerializzata.Core
 
             foreach (var dettaglio in dettagli.Values)
             {
-                sb.Append("<dat:DettaglioPrescrizioneInvioErogato>");
+                sb.AppendFormat("<{0}:DettaglioPrescrizioneInvioErogato>", prefissoTipiDati);
 
                 foreach (string campo in ordineCampi)
                 {
                     if (!dettaglio.TryGetValue(campo, out var valore) || string.IsNullOrWhiteSpace(valore))
                         continue;
 
-                    sb.AppendFormat("<dat:{0}>{1}</dat:{0}>", campo, SecurityElement.Escape(valore));
+                    sb.AppendFormat("<{0}:{1}>{2}</{0}:{1}>", prefissoTipiDati, campo, SecurityElement.Escape(valore));
                 }
 
-                sb.Append("</dat:DettaglioPrescrizioneInvioErogato>");
+                sb.AppendFormat("</{0}:DettaglioPrescrizioneInvioErogato>", prefissoTipiDati);
             }
 
             sb.AppendFormat("</{0}:ElencoDettagliPrescrInviiErogato>", prefissoNs);

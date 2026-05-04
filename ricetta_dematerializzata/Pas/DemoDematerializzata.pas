@@ -1,12 +1,9 @@
 unit DemoDematerializzata;
 
 {
-  Demo completa del flusso Prescrittore via COM:
-    1. Configurazione client (test o produzione)
-    2. Verifica token in memoria con CheckToken
-    3. Creazione token con CreateAuth (auto in test, manuale via email in produzione)
-    4. Configurazione Authorization2F
-    5. Chiamata InvioPrescritto
+  Demo completa dei flussi via COM:
+    1. Prescrittore: A2F via Chiama(20/21/22) + InvioPrescritto
+    2. Erogatore: VisualizzaErogato (presa in carico) + InvioErogato (conferma erogazione)
 
   Dati di esempio allineati al form di test (MainForm.cs).
 
@@ -43,6 +40,15 @@ const
   DEMO_COD_ASL_AO_SERVIZI    = '201';
   DEMO_COD_STRUTTURA_SERVIZI = '201600104';
 
+  // Erogatore
+  DEMO_EROG_USERNAME         = 'TSTSIC00B01H501E';
+  DEMO_EROG_PASSWORD         = 'Salve123';
+  DEMO_EROG_PINCODE          = 'TSTSIC00B01H501E';
+  DEMO_EROG_COD_REGIONE      = '190';
+  DEMO_EROG_COD_ASL          = '201';
+  DEMO_EROG_COD_SSA          = '888888';
+  DEMO_EROG_NRE              = '1900A4005322015';
+
   // Produzione: seriale del certificato nel Windows Certificate Store.
   // Lasciare vuoto (solo Basic Auth).
   DEMO_SERIALE_CERTIFICATO   = '';
@@ -50,10 +56,14 @@ const
 // ─── Punto di ingresso demo ──────────────────────────────────────────────────
 
 /// Esegue l'intero flusso:
-///   CreateAuth (o CheckToken se token già presente) → InvioPrescritto.
+///   A2F via Chiama(SRV_CREATE_AUTH/SRV_CHECK_TOKEN/SRV_REVOKE_AUTH) → InvioPrescritto.
 /// IsTest = True  → AMB_TEST,  token estratto dalla risposta.
 /// IsTest = False → AMB_PRODUZIONE, token inserito manualmente dall'utente.
 procedure EseguiDemoInvioPrescritto(const IsTest: Boolean = True);
+
+/// Esegue il flusso erogatore:
+///   VisualizzaErogato (presa in carico) → InvioErogato (conferma erogazione).
+procedure EseguiDemoPresaInCaricoEdErogazione(const IsTest: Boolean = True);
 
 implementation
 
@@ -124,6 +134,46 @@ begin
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'descrProdPrest',  'ELETTROCARDIOGRAMMA (ECG) BASALE');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'quantita',        '1');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'tipoAccesso',     '1');
+end;
+
+function BuildVisualizzaErogatoInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+  Result := KVSet(Result, 'nre',                    DEMO_EROG_NRE);
+  Result := KVSet(Result, 'tipoOperazione',         '1'); // presa in carico
+  Result := KVSet(Result, 'cfAssistito',            DEMO_CF_ASSISTITO);
+end;
+
+function BuildInvioErogatoInput: string;
+var
+  DataOra: string;
+begin
+  DataOra := FormatDateTime('yyyy-mm-dd hh:nn:ss', Now);
+
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+  Result := KVSet(Result, 'pwd',                    DEMO_EROG_USERNAME);
+  Result := KVSet(Result, 'nre',                    DEMO_EROG_NRE);
+  Result := KVSet(Result, 'cfAssistito',            DEMO_CF_ASSISTITO);
+  Result := KVSet(Result, 'tipoOperazione',         '1');
+  Result := KVSet(Result, 'prescrizioneFruita',     '1');
+  Result := KVSet(Result, 'dataSpedizione',         DataOra);
+
+  Result := KVSet(Result, 'ElencoDettagliPrescrInviiErogato', 'ARRAY');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'codProdPrest',        '89.7');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'codProdPrestErog',    '89.7');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'descrProdPrestErog',  'VISITA CARDIOLOGICA');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'prezzo',              '36.15');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'quantitaErogata',     '1');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'dataIniErog',          DataOra);
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'dataFineErog',         DataOra);
 end;
 
 // ─── Helpers token ───────────────────────────────────────────────────────────
@@ -275,6 +325,53 @@ begin
       'Esito: ' + KVGet(InvioOutput, 'CODICE_ESITO_INSERIMENTO')
     );
 
+  finally
+    Client.Free;
+  end;
+end;
+
+procedure EseguiDemoPresaInCaricoEdErogazione(const IsTest: Boolean);
+var
+  Client: TRicettaDematerializzataClient;
+  VisualizzaOutput: string;
+  InvioOutput: string;
+  Ambiente: Integer;
+  Seriale: string;
+begin
+  if IsTest then
+  begin
+    Ambiente := AMB_TEST;
+    Seriale  := '';
+  end
+  else
+  begin
+    Ambiente := AMB_PRODUZIONE;
+    Seriale  := DEMO_SERIALE_CERTIFICATO;
+  end;
+
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, Seriale, Ambiente);
+
+    // 1) Presa in carico ricetta
+    VisualizzaOutput := Client.Chiama(SRV_VISUALIZZA_EROGATO, BuildVisualizzaErogatoInput);
+    if KVIsErrore(VisualizzaOutput) then
+      raise Exception.CreateFmt(
+        'VisualizzaErogato fallita: [%s] %s',
+        [KVGetErroreNumero(VisualizzaOutput), KVGetErroreDescrizione(VisualizzaOutput)]);
+
+    // 2) Conferma erogazione prestazioni
+    InvioOutput := Client.Chiama(SRV_INVIO_EROGATO, BuildInvioErogatoInput);
+    if KVIsErrore(InvioOutput) then
+      raise Exception.CreateFmt(
+        'InvioErogato fallita: [%s] %s',
+        [KVGetErroreNumero(InvioOutput), KVGetErroreDescrizione(InvioOutput)]);
+
+    ShowMessage(
+      'Flusso erogatore completato.' + #13#10 +
+      'Presa in carico (VisualizzaErogato) OK.' + #13#10 +
+      'Conferma erogazione (InvioErogato) OK.'
+    );
   finally
     Client.Free;
   end;

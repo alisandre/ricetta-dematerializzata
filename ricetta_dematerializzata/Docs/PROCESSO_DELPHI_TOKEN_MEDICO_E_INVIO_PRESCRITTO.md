@@ -1,11 +1,9 @@
-# Processo Delphi esterno: token medico + InvioPrescritto
+# Processo Delphi esterno: token medico + InvioPrescritto + flusso Erogatore
 
-Questo documento descrive un flusso tipico di una applicazione Delphi esterna che usa la DLL via COM per:
+Questo documento descrive due flussi tipici di una applicazione Delphi esterna che usa la DLL via COM:
 
-1. verificare se esiste già in memoria un token per il medico loggato,
-2. controllare se il token è ancora valido con `CheckToken`,
-3. ricrearlo con `CreateAuth` se assente o non valido,
-4. chiamare `InvioPrescritto` usando il token valido.
+1. flusso prescrittore con token A2F e `InvioPrescritto`,
+2. flusso erogatore con `VisualizzaErogato` (presa in carico) seguito da `InvioErogato` (conferma erogazione).
 
 ---
 
@@ -86,12 +84,17 @@ Questo significa che il flusso di creazione token **deve essere differenziato** 
 
 ## Servizi coinvolti
 
-### A2F
+### A2F (via `Chiama`)
 - `SRV_CREATE_AUTH = 20`
+- `SRV_REVOKE_AUTH = 21`
 - `SRV_CHECK_TOKEN = 22`
 
 ### Prescrittore
 - `SRV_INVIO_PRESCRITTO = 2`
+
+### Erogatore
+- `SRV_VISUALIZZA_EROGATO = 11` (presa in carico / blocco ricetta)
+- `SRV_INVIO_EROGATO = 10` (conferma erogazione prestazioni)
 
 ---
 
@@ -114,6 +117,9 @@ begin
 end;
 ```
 
+Nota:
+- I servizi token A2F vengono chiamati anch'essi con `Client.Chiama(...)` usando gli ID `20/21/22`.
+
 ---
 
 ### 2. Verifica token già presente in memoria
@@ -133,7 +139,7 @@ end;
 
 ### 3. CheckToken
 
-Per `CheckToken` la DLL espone il servizio A2F tramite `Chiama(...)`.
+Per `CheckToken` la DLL espone il servizio A2F tramite `Chiama(...)` con `SRV_CHECK_TOKEN = 22`.
 
 Esempio input KV:
 
@@ -182,7 +188,7 @@ begin
 end;
 ```
 
-Se il token non è valido, si passa a `CreateAuth`.
+Se il token non è valido, si passa a `CreateAuth` (`SRV_CREATE_AUTH = 20`).
 
 ---
 
@@ -326,6 +332,82 @@ InvioOutput := Client.Chiama(
   SRV_INVIO_PRESCRITTO,
   BuildInvioPrescrittoInput(LoggedUserCfMedico)
 );
+```
+
+---
+
+## Flusso Erogatore: presa in carico + conferma erogazione
+
+Per l'erogatore il flusso applicativo raccomandato è:
+
+1. `VisualizzaErogato` con `tipoOperazione=1` per prendere in carico la ricetta;
+2. `InvioErogato` per confermare che le prestazioni sono state erogate.
+
+### 1) VisualizzaErogato (presa in carico)
+
+Input esempio:
+
+```pascal
+function BuildVisualizzaErogatoInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                'TSTSIC00B01H501E');
+  Result := KVSet(Result, 'codiceRegioneErogatore', '190');
+  Result := KVSet(Result, 'codiceAslErogatore',     '201');
+  Result := KVSet(Result, 'codiceSsaErogatore',     '888888');
+  Result := KVSet(Result, 'nre',                    '1900A4005322015');
+  Result := KVSet(Result, 'tipoOperazione',         '1');
+  Result := KVSet(Result, 'cfAssistito',            'GLLGNN37B51C286O');
+end;
+```
+
+Chiamata:
+
+```pascal
+VisualizzaOutput := Client.Chiama(
+  SRV_VISUALIZZA_EROGATO,
+  BuildVisualizzaErogatoInput
+);
+```
+
+### 2) InvioErogato (conferma erogazione)
+
+Input esempio:
+
+```pascal
+function BuildInvioErogatoInput: string;
+var
+  DataOra: string;
+begin
+  DataOra := FormatDateTime('yyyy-mm-dd hh:nn:ss', Now);
+
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                'TSTSIC00B01H501E');
+  Result := KVSet(Result, 'codiceRegioneErogatore', '190');
+  Result := KVSet(Result, 'codiceAslErogatore',     '201');
+  Result := KVSet(Result, 'codiceSsaErogatore',     '888888');
+  Result := KVSet(Result, 'pwd',                    'TSTSIC00B01H501E');
+  Result := KVSet(Result, 'nre',                    '1900A4005322015');
+  Result := KVSet(Result, 'cfAssistito',            'GLLGNN37B51C286O');
+  Result := KVSet(Result, 'tipoOperazione',         '1');
+  Result := KVSet(Result, 'prescrizioneFruita',     '1');
+  Result := KVSet(Result, 'dataSpedizione',         DataOra);
+end;
+```
+
+Chiamata:
+
+```pascal
+InvioOutput := Client.Chiama(
+  SRV_INVIO_EROGATO,
+  BuildInvioErogatoInput
+);
+```
+
+Sequenza:
+
+```text
+VisualizzaErogato (presa in carico) → InvioErogato (conferma erogazione)
 ```
 
 ---

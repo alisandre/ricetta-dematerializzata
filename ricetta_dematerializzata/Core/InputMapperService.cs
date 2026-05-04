@@ -46,7 +46,7 @@ namespace ricetta_dematerializzata.Core
                 ["CODREGIONE"] = "codRegione",
                 ["CODASLAO"] = "codASLAo",
                 ["CODSTRUTTURA"] = "codStruttura",
-                ["CODSPECIALIZZAZIONE"] = "codSpecializzazione",
+                ["CODPECIALIZZAZIONE"] = "codSpecializzazione",
                 ["CODICEASS"] = "codiceAss",
                 ["TIPOPRESCRIZIONE"] = "tipoPrescrizione",
                 ["RICETTAINTERNA"] = "ricettaInterna",
@@ -94,7 +94,7 @@ namespace ricetta_dematerializzata.Core
                 ["CODREGIONE"] = "codRegione",
                 ["CODASLAO"] = "codASLAo",
                 ["CODSTRUTTURA"] = "codStruttura",
-                ["CODSPECIALIZZAZIONE"] = "codSpecializzazione",
+                ["CODPECIALIZZAZIONE"] = "codSpecializzazione",
                 ["CFMEDICOSOSTITUTO"] = "cfMedicoSostituto",
                 ["DATAINIZIOSOSTITUZIONE"] = "dataInizioSostituzione",
                 ["DATAFINESOSTITUZIONE"] = "dataFineSostituzione"
@@ -104,6 +104,7 @@ namespace ricetta_dematerializzata.Core
                 ["NRE"] = "nre",
                 ["CFASSISTITO"] = "cfAssistito",
                 ["TIPOOPERAZIONE"] = "tipoOperazione",
+                ["PRESCRIZIONEFRUITA"] = "prescrizioneFruita",
                 ["DATASPEDIZIONE"] = "dataSpedizione"
             }),
             [DigitalPrescriptionService.VisualizzaErogato] = ErogatoreAliasBase(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -269,20 +270,33 @@ namespace ricetta_dematerializzata.Core
                 if (!normalized.TryGetValue(campo, out var valore) || string.IsNullOrWhiteSpace(valore))
                     continue;
 
-                if (!DateTime.TryParseExact(valore, FormatoDataOra,
+                if (DateTime.TryParseExact(valore, FormatoDataOra,
                         System.Globalization.CultureInfo.InvariantCulture,
                         System.Globalization.DateTimeStyles.None, out _))
                 {
-                    throw new ArgumentException(
-                        $"Il campo '{campo}' ha formato data non valido: '{valore}'. " +
-                        $"Il formato atteso è '{FormatoDataOra}' (es. 2026-01-01 10:00:00).");
+                    continue;
                 }
+
+                // Compatibilità input: per dataSpedizione accetta anche sola data (yyyy-MM-dd)
+                if (string.Equals(campo, "dataSpedizione", StringComparison.OrdinalIgnoreCase)
+                    && DateTime.TryParseExact(valore, "yyyy-MM-dd",
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None, out var dataSoloGiorno))
+                {
+                    normalized[campo] = dataSoloGiorno.ToString(FormatoDataOra, System.Globalization.CultureInfo.InvariantCulture);
+                    continue;
+                }
+
+                throw new ArgumentException(
+                    $"Il campo '{campo}' ha formato data non valido: '{valore}'. " +
+                    $"Il formato atteso è '{FormatoDataOra}' (es. 2026-01-01 10:00:00).");
             }
         }
 
         private static Dictionary<string, string> ErogatoreAliasBase(Dictionary<string, string> specific)
         {
             specific["PINCODE"] = "pinCode";
+            specific["PWD"] = "pwd";
             specific["CODICEREGIONEEROGATORE"] = "codiceRegioneErogatore";
             specific["CODICEASLEROGATORE"] = "codiceAslErogatore";
             specific["CODICESSAEROGATORE"] = "codiceSsaErogatore";

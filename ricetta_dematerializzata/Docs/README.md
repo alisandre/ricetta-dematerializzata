@@ -93,8 +93,8 @@ Output errore:
 
 | Valore | Nome | Descrizione |
 |--------|------|-------------|
-| 10 | `InvioErogato` | Invio erogato farmacia |
-| 11 | `VisualizzaErogato` | Dettagli erogato |
+| 10 | `InvioErogato` | Conferma erogazione prestazioni (dopo presa in carico) |
+| 11 | `VisualizzaErogato` | Presa in carico / blocco ricetta |
 | 12 | `SospendiErogato` | Sospensione erogato |
 | 13 | `AnnullaErogato` | Annullamento erogato |
 | 14 | `RicercaErogatore` | Ricerca farmacia/erogatore |
@@ -103,6 +103,11 @@ Output errore:
 | 17 | `RicettaDifferita` | Ricetta differita |
 | 18 | `AnnullaErogatoDiff` | Annulla erogato differito |
 | 19 | `RicevuteSac` | Ricevute SAC |
+
+**Flusso operativo erogatore raccomandato**
+
+1. `VisualizzaErogato` con `tipoOperazione=1` per prendere in carico la ricetta.
+2. `InvioErogato` per confermare l'erogazione delle prestazioni.
 
 ### Authorization 2D (A2F)
 
@@ -188,8 +193,8 @@ Per deregistrare:
 ### 2) API pubblica
 
 - `Configura(username, password, seriale, ambiente)` — configurazione principale
-- `ConfiguraAuthorization2F(tokenOrBearer)` — token A2F
-- `Chiama(servizio, parametriInputKV)` — chiamata servizio
+- `ConfiguraAuthorization2F(tokenOrBearer)` — token A2F da usare sui servizi DEM (prescrittore/erogatore)
+- `Chiama(servizio, parametriInputKV)` — chiamata servizio (inclusi A2F con codici `20/21/22`)
 - `ChiamaJson(servizio, parametriInputJson)` — chiamata con I/O JSON
 - `OttieniUrl(servizio)` — URL endpoint
 - `TestConnessione(servizio)` — test raggiungibilità
@@ -210,7 +215,7 @@ begin
   try
     client.Configura('utente', 'password', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE);
 
-    // A2F → Basic Auth automatica
+    // A2F chiamato dall'esterno via Chiama(20/21/22)
     output := client.Chiama(SRV_CREATE_AUTH,
       'userId=PROVAX00X00X000Y;cfUtente=PROVAX00X00X000Y;contesto=RICETTA-DEM;applicazione=PRESCRITTORE');
     client.ConfiguraAuthorization2F(KVGet(output, 'MESSAGGIO'));
@@ -240,9 +245,12 @@ end;
 var client = new RicettaDematerializzataBaseClient();
 client.Configura("utente", "password", "F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D", ambiente: 1);
 
-// A2F
-var token = client.Chiama((int)DigitalPrescriptionService.CreateAuth,
+// A2F via Chiama con codici enum 20/21/22
+var createOut = client.Chiama((int)DigitalPrescriptionService.CreateAuth,
     "userId=PROVAX00X00X000Y;cfUtente=PROVAX00X00X000Y;contesto=RICETTA-DEM;applicazione=PRESCRITTORE");
+
+var token = ParserKV.Parse(createOut).TryGetValue("MESSAGGIO", out var t) ? t : string.Empty;
+client.ConfiguraAuthorization2F(token);
 
 // Prescrittore
 var output = client.Chiama((int)DigitalPrescriptionService.InvioPrescritto,
