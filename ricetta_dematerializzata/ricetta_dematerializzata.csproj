@@ -62,6 +62,9 @@
     <None Update="Docs\INDICE_DOCUMENTAZIONE.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Docs\INSTALLAZIONE_E_UTILIZZO.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Docs\INTERFACCIAMENTO_ESTERNO.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -75,6 +78,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Docs\PROCESSO_DELPHI_TOKEN_MEDICO_E_INVIO_PRESCRITTO.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Docs\QUICK_START_INSTALLAZIONE.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Docs\README.md">

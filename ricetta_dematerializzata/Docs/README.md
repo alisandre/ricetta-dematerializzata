@@ -8,6 +8,22 @@ Libreria .NET Framework 4.8 per i servizi SAC/DEM Ricetta, utilizzabile:
 
 ---
 
+## 🚀 Quick Start
+
+**Se vuoi solo installare la DLL rapidamente:**
+
+→ Vedi [`QUICK_START_INSTALLAZIONE.md`](./QUICK_START_INSTALLAZIONE.md)
+
+**Se vuoi integrare la DLL in un'applicazione esterna:**
+
+→ Vedi [`INSTALLAZIONE_E_UTILIZZO.md`](./INSTALLAZIONE_E_UTILIZZO.md)
+
+**Se vuoi capire l'architettura completa:**
+
+→ Continua a leggere questo documento
+
+---
+
 ## Architettura
 
 ```

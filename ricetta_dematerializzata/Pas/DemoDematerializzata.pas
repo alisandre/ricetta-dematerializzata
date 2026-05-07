@@ -4,8 +4,18 @@ unit DemoDematerializzata;
   Demo completa dei flussi via COM:
     1. Prescrittore: A2F via Chiama(20/21/22) + InvioPrescritto
     2. Erogatore: VisualizzaErogato (presa in carico) + InvioErogato (conferma erogazione)
+    3. Servizi singoli: builder e procedure di test per ogni servizio
 
   Dati di esempio allineati al form di test (MainForm.cs).
+
+  Procedure disponibili:
+    - EseguiDemoInvioPrescritto(IsTest): flusso completo Prescrittore con A2F
+    - EseguiDemoPresaInCaricoEdErogazione(IsTest): flusso completo Erogatore
+    - TestVisualizzaPrescritto, TestAnnullaPrescritto, TestInterrogaNreUtilizzati, 
+      TestServiceAnagPrescrittore: test servizi Prescrittore
+    - TestSospendiErogato, TestAnnullaErogato, TestRicercaErogatore,
+      TestReportErogatoMensile, TestServiceAnagErogatore, TestRicettaDifferita,
+      TestAnnullaErogatoDiff, TestRicevuteSac: test servizi Erogatore
 
   Prerequisito:
     - ricetta_dematerializzata.dll registrata COM:
@@ -94,6 +104,53 @@ begin
   Result := KVSet(Result, 'applicazione',  'PRESCRITTORE');
 end;
 
+// ─── Builder input servizi PRESCRITTORE ──────────────────────────────────────
+
+function BuildVisualizzaPrescrittoInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',   '1234567890');
+  Result := KVSet(Result, 'nre',       '120000000000');
+  Result := KVSet(Result, 'cfMedico',  DEMO_USER_ID);
+end;
+
+function BuildAnnullaPrescrittoInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',   '1234567890');
+  Result := KVSet(Result, 'nre',       '120000000000');
+  Result := KVSet(Result, 'cfMedico',  DEMO_USER_ID);
+end;
+
+function BuildInterrogaNreUtilizzatiInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',     '1234567890');
+  Result := KVSet(Result, 'codRegione',  DEMO_COD_REGIONE_SERVIZI);
+  Result := KVSet(Result, 'cfMedico',    DEMO_USER_ID);
+end;
+
+function BuildServiceAnagPrescrittoreInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',         '1234567890');
+  Result := KVSet(Result, 'tipoOperazione',  '1');
+end;
+
+function BuildInvioDichiarazioneSostituzioneInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                  '1234567890');
+  Result := KVSet(Result, 'pwd',                      'UTENTE');
+  Result := KVSet(Result, 'cfMedicoTitolare',         DEMO_USER_ID);
+  Result := KVSet(Result, 'codRegione',               DEMO_COD_REGIONE_SERVIZI);
+  Result := KVSet(Result, 'codASLAo',                 DEMO_COD_ASL_AO_SERVIZI);
+  Result := KVSet(Result, 'codSpecializzazione',      'P');
+  Result := KVSet(Result, 'cfMedicoSostituto',        'RSSMRA80A01H501T');
+  Result := KVSet(Result, 'dataInizioSostituzione',   '2026-01-01');
+  Result := KVSet(Result, 'dataFineSostituzione',     '2026-01-31');
+end;
+
 // ─── Builder input InvioPrescritto ───────────────────────────────────────────
 
 function BuildInvioPrescrittoInput: string;
@@ -136,6 +193,8 @@ begin
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'tipoAccesso',     '1');
 end;
 
+// ─── Builder input servizi EROGATORE ──────────────────────────────────────────
+
 function BuildVisualizzaErogatoInput: string;
 begin
   Result := '';
@@ -146,6 +205,82 @@ begin
   Result := KVSet(Result, 'nre',                    DEMO_EROG_NRE);
   Result := KVSet(Result, 'tipoOperazione',         '1'); // presa in carico
   Result := KVSet(Result, 'cfAssistito',            DEMO_CF_ASSISTITO);
+end;
+
+function BuildSospendiErogatoInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+  Result := KVSet(Result, 'nre',                    '120000000000');
+  Result := KVSet(Result, 'tipoOperazione',         'S');
+end;
+
+function BuildAnnullaErogatoInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+  Result := KVSet(Result, 'nre',                    '120000000000');
+  Result := KVSet(Result, 'codAnnullamento',        '1');
+end;
+
+function BuildRicercaErogatoreInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+end;
+
+function BuildReportErogatoMensileInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+  Result := KVSet(Result, 'annoMese',               '202601');
+end;
+
+function BuildServiceAnagErogatoreInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',         DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'tipoOperazione',  '1');
+end;
+
+function BuildRicettaDifferitaInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+  Result := KVSet(Result, 'codMotivazione',        '1');
+  Result := KVSet(Result, 'dataDal',                '2026-01-01');
+end;
+
+function BuildAnnullaErogatoDiffInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode',                DEMO_EROG_PINCODE);
+  Result := KVSet(Result, 'codiceRegioneErogatore', DEMO_EROG_COD_REGIONE);
+  Result := KVSet(Result, 'codiceAslErogatore',     DEMO_EROG_COD_ASL);
+  Result := KVSet(Result, 'codiceSsaErogatore',     DEMO_EROG_COD_SSA);
+  Result := KVSet(Result, 'idRicetta',              '1');
+  Result := KVSet(Result, 'nre',                    '120000000000');
+end;
+
+function BuildRicevuteSacInput: string;
+begin
+  Result := '';
+  Result := KVSet(Result, 'pinCode', DEMO_EROG_PINCODE);
 end;
 
 function BuildInvioErogatoInput: string;
@@ -372,6 +507,241 @@ begin
       'Presa in carico (VisualizzaErogato) OK.' + #13#10 +
       'Conferma erogazione (InvioErogato) OK.'
     );
+  finally
+    Client.Free;
+  end;
+end;
+
+// ─── Procedure di test per singoli servizi PRESCRITTORE ──────────────────────
+
+/// Testa il servizio VisualizzaPrescritto
+procedure TestVisualizzaPrescritto(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_VISUALIZZA_PRESCRITTO, BuildVisualizzaPrescrittoInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ VisualizzaPrescritto fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ VisualizzaPrescritto completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio InterrogaNreUtilizzati
+procedure TestInterrogaNreUtilizzati(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_INTERROGA_NRE_UTILIZZATI, BuildInterrogaNreUtilizzatiInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ InterrogaNreUtilizzati fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ InterrogaNreUtilizzati completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio ServiceAnagPrescrittore
+procedure TestServiceAnagPrescrittore(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_SERVICE_ANAG_PRESCRITTORE, BuildServiceAnagPrescrittoreInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ ServiceAnagPrescrittore fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ ServiceAnagPrescrittore completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+// ─── Procedure di test per singoli servizi EROGATORE ──────────────────────────
+
+/// Testa il servizio SospendiErogato
+procedure TestSospendiErogato(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_SOSPENDI_EROGATO, BuildSospendiErogatoInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ SospendiErogato fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ SospendiErogato completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio AnnullaErogato
+procedure TestAnnullaErogato(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_ANNULLA_EROGATO, BuildAnnullaErogatoInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ AnnullaErogato fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ AnnullaErogato completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio RicercaErogatore
+procedure TestRicercaErogatore(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_RICERCA_EROGATORE, BuildRicercaErogatoreInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ RicercaErogatore fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ RicercaErogatore completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio ReportErogatoMensile
+procedure TestReportErogatoMensile(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_REPORT_EROGATO_MENSILE, BuildReportErogatoMensileInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ ReportErogatoMensile fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ ReportErogatoMensile completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio ServiceAnagErogatore
+procedure TestServiceAnagErogatore(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_SERVICE_ANAG_EROGATORE, BuildServiceAnagErogatoreInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ ServiceAnagErogatore fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ ServiceAnagErogatore completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio RicettaDifferita
+procedure TestRicettaDifferita(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_RICETTA_DIFFERITA, BuildRicettaDifferitaInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ RicettaDifferita fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ RicettaDifferita completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio AnnullaErogatoDiff
+procedure TestAnnullaErogatoDiff(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_ANNULLA_EROGATO_DIFF, BuildAnnullaErogatoDiffInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ AnnullaErogatoDiff fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ AnnullaErogatoDiff completata.' + #13#10 + Output);
+  finally
+    Client.Free;
+  end;
+end;
+
+/// Testa il servizio RicevuteSac
+procedure TestRicevuteSac(const IsTest: Boolean = True);
+var
+  Client: TRicettaDematerializzataClient;
+  Output: string;
+  Ambiente: Integer;
+begin
+  Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
+  Client := TRicettaDematerializzataClient.Create;
+  try
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Output := Client.Chiama(SRV_RICEVUTE_SAC, BuildRicevuteSacInput);
+    if KVIsErrore(Output) then
+      ShowMessage('❌ RicevuteSac fallita: ' + KVGetErroreDescrizione(Output))
+    else
+      ShowMessage('✅ RicevuteSac completata.' + #13#10 + Output);
   finally
     Client.Free;
   end;
