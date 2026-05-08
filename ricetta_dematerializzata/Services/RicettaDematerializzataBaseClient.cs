@@ -176,6 +176,8 @@ namespace ricetta_dematerializzata.Services
                 var dictInput    = ParserKV.Parse(parametriInput);
                 var dictCanonico = InputMapperService.NormalizeAndValidate(servizio, dictInput);
 
+                ValidaIdentificativiErogatore(servizio, dictCanonico, config.Ambiente);
+
                 // 2. Cifratura automatica CF e pincode
                 CifraParametriSensibili(dictCanonico);
 
@@ -439,6 +441,47 @@ namespace ricetta_dematerializzata.Services
 
         private static string Escape(string s)
             => s.Replace("\\", "\\\\").Replace("\"", "\\\"");
+
+        private static void ValidaIdentificativiErogatore(DigitalPrescriptionService servizio, Dictionary<string, string> dict, ServiceEnvironment ambiente)
+        {
+            if (!RichiedeIdentificativiErogatore(servizio))
+                return;
+
+            bool hasSsaKey = dict.ContainsKey("codiceSsaErogatore");
+            bool hasStrutturaKey = dict.ContainsKey("codiceStruttura");
+            bool hasSsaValue = dict.TryGetValue("codiceSsaErogatore", out var ssa) && !string.IsNullOrWhiteSpace(ssa);
+            bool hasStrutturaValue = dict.TryGetValue("codiceStruttura", out var struttura) && !string.IsNullOrWhiteSpace(struttura);
+
+            if (ambiente == ServiceEnvironment.Test)
+            {
+                if (!hasSsaValue)
+                    throw new ArgumentException("In ambiente TEST è obbligatorio il parametro 'codiceSsaErogatore'.");
+                return;
+            }
+
+            if (!hasStrutturaValue)
+                throw new ArgumentException("In ambiente PRODUZIONE è obbligatorio il parametro 'codiceStruttura'.");
+
+            if (hasSsaKey)
+                throw new ArgumentException("In ambiente PRODUZIONE 'codiceSsaErogatore' non deve essere inviato quando è presente 'codiceStruttura' (nemmeno vuoto).");
+
+            if (hasSsaValue && hasStrutturaValue)
+                throw new ArgumentException("In ambiente PRODUZIONE 'codiceSsaErogatore' e 'codiceStruttura' sono alternativi: inviare solo 'codiceStruttura'.");
+        }
+
+        private static bool RichiedeIdentificativiErogatore(DigitalPrescriptionService servizio)
+            => servizio switch
+            {
+                DigitalPrescriptionService.InvioErogato => true,
+                DigitalPrescriptionService.VisualizzaErogato => true,
+                DigitalPrescriptionService.SospendiErogato => true,
+                DigitalPrescriptionService.AnnullaErogato => true,
+                DigitalPrescriptionService.RicercaErogatore => true,
+                DigitalPrescriptionService.ReportErogatoMensile => true,
+                DigitalPrescriptionService.RicettaDifferita => true,
+                DigitalPrescriptionService.AnnullaErogatoDiff => true,
+                _ => false
+            };
     }
 }
 

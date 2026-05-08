@@ -125,6 +125,11 @@ Output errore:
 1. `VisualizzaErogato` con `tipoOperazione=1` per prendere in carico la ricetta.
 2. `InvioErogato` per confermare l'erogazione delle prestazioni.
 
+**Regola identificativi erogatore (validata in esercizio)**
+- **TEST**: usare `codiceSsaErogatore`
+- **PRODUZIONE**: usare `codiceStruttura`
+- In **PRODUZIONE** i due campi sono alternativi esclusivi: se si invia `codiceStruttura`, `codiceSsaErogatore` non va inviato (nemmeno vuoto).
+
 ### Authorization 2D (A2F)
 
 | Valore | Nome | Descrizione |

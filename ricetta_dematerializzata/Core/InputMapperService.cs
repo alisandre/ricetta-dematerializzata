@@ -15,15 +15,15 @@ namespace ricetta_dematerializzata.Core
             [DigitalPrescriptionService.InterrogaNreUtilizzati] = new[] { "pinCode", "codRegione", "cfMedico" },
             [DigitalPrescriptionService.ServiceAnagPrescrittore] = new[] { "pinCode", "tipoOperazione" },
             [DigitalPrescriptionService.InvioDichiarazioneSostituzioneMedico] = new[] { "pinCode", "pwd", "cfMedicoTitolare", "codRegione", "codASLAo", "codSpecializzazione", "cfMedicoSostituto", "dataInizioSostituzione", "dataFineSostituzione" },
-            [DigitalPrescriptionService.InvioErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore", "nre", "tipoOperazione", "dataSpedizione" },
-            [DigitalPrescriptionService.VisualizzaErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore", "nre", "tipoOperazione" },
-            [DigitalPrescriptionService.SospendiErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore", "nre", "tipoOperazione" },
-            [DigitalPrescriptionService.AnnullaErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore", "nre", "codAnnullamento" },
-            [DigitalPrescriptionService.RicercaErogatore] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore" },
-            [DigitalPrescriptionService.ReportErogatoMensile] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore", "annoMese" },
+            [DigitalPrescriptionService.InvioErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "nre", "tipoOperazione", "dataSpedizione" },
+            [DigitalPrescriptionService.VisualizzaErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "nre", "tipoOperazione" },
+            [DigitalPrescriptionService.SospendiErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "nre", "tipoOperazione" },
+            [DigitalPrescriptionService.AnnullaErogato] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "nre", "codAnnullamento" },
+            [DigitalPrescriptionService.RicercaErogatore] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore" },
+            [DigitalPrescriptionService.ReportErogatoMensile] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "annoMese" },
             [DigitalPrescriptionService.ServiceAnagErogatore] = new[] { "pinCode", "tipoOperazione" },
-            [DigitalPrescriptionService.RicettaDifferita] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore", "codMotivazione", "dataDal" },
-            [DigitalPrescriptionService.AnnullaErogatoDiff] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codiceSsaErogatore", "idRicetta", "nre" },
+            [DigitalPrescriptionService.RicettaDifferita] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "codMotivazione", "dataDal" },
+            [DigitalPrescriptionService.AnnullaErogatoDiff] = new[] { "pinCode", "codiceRegioneErogatore", "codiceAslErogatore", "idRicetta", "nre" },
 
             [DigitalPrescriptionService.CreateAuth] = new[] { "contesto" },
             [DigitalPrescriptionService.RevokeAuth] = new[] { "token" },
@@ -300,6 +300,8 @@ namespace ricetta_dematerializzata.Core
             specific["CODICEREGIONEEROGATORE"] = "codiceRegioneErogatore";
             specific["CODICEASLEROGATORE"] = "codiceAslErogatore";
             specific["CODICESSAEROGATORE"] = "codiceSsaErogatore";
+            specific["CODICESTRUTTURA"] = "codiceStruttura";
+            specific["CODSTRUTTURA"] = "codiceStruttura";
             return specific;
         }
     }

@@ -152,6 +152,11 @@ Il flusso consigliato è:
 1. `SRV_VISUALIZZA_EROGATO` con `tipoOperazione=1` (presa in carico / blocco ricetta)
 2. `SRV_INVIO_EROGATO` (conferma prestazioni erogate)
 
+**Regola identificativi erogatore (validata in esercizio)**
+- **TEST**: inviare `codiceSsaErogatore`
+- **PRODUZIONE**: inviare `codiceStruttura`
+- In **PRODUZIONE** i due campi sono alternativi esclusivi: se è presente `codiceStruttura`, `codiceSsaErogatore` non deve essere inviato (nemmeno vuoto).
+
 Esempio Delphi sintetico:
 
 ```pascal

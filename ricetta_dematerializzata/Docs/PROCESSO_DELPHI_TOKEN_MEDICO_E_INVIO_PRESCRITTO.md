@@ -343,6 +343,11 @@ Per l'erogatore il flusso applicativo raccomandato è:
 1. `VisualizzaErogato` con `tipoOperazione=1` per prendere in carico la ricetta;
 2. `InvioErogato` per confermare che le prestazioni sono state erogate.
 
+**Regola identificativi erogatore (validata in esercizio)**
+- **TEST**: inviare `codiceSsaErogatore`
+- **PRODUZIONE**: inviare `codiceStruttura`
+- In **PRODUZIONE** i due campi sono alternativi esclusivi: se si invia `codiceStruttura`, `codiceSsaErogatore` non deve comparire nella request (nemmeno vuoto).
+
 ### 1) VisualizzaErogato (presa in carico)
 
 Input esempio:

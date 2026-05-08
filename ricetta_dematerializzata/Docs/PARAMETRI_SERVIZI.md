@@ -144,6 +144,11 @@ Legenda:
 
 ## Erogatore
 
+> Regola operativa validata:
+> - **TEST**: inviare obbligatoriamente `codiceSsaErogatore`
+> - **PRODUZIONE**: inviare obbligatoriamente `codiceStruttura`
+> - **PRODUZIONE**: `codiceSsaErogatore` e `codiceStruttura` sono **alternativi esclusivi**: se è presente uno, l'altro **non va inviato** (nemmeno vuoto).
+
 ### 10. InvioErogato
 
 > Nota di processo: `InvioErogato` è la conferma di erogazione. Per la presa in carico/blocco ricetta usare prima `VisualizzaErogato` (`tipoOperazione=1`).
@@ -153,7 +158,8 @@ Legenda:
 | `pinCode` | sì | `PINCODE` | PinCode inviante |
 | `codiceRegioneErogatore` | sì | `CODICEREGIONEEROGATORE` | Codice regione della struttura erogatrice |
 | `codiceAslErogatore` | sì | `CODICEASLEROGATORE` | Codice ASL della struttura erogatrice |
-| `codiceSsaErogatore` | sì | `CODICESSAEROGATORE` | Codice SSA della struttura erogatrice |
+| `codiceSsaErogatore` | condizionale | `CODICESSAEROGATORE` | **Obbligatorio in TEST** |
+| `codiceStruttura` | condizionale | `CODICESTRUTTURA`, `CODSTRUTTURA` | **Obbligatorio in PRODUZIONE** |
 | `nre` | sì | `NRE` | Numero Ricetta Elettronica |
 | `tipoOperazione` | sì | `TIPOOPERAZIONE` | 1 = Erogazione totale, 2 = Erogazione parziale, 3 = Erogazione parziale con chiusura forzata, 4 = Erogazione differita totale, 5 = Erogazione differita con chiusura forzata |
 | `dataSpedizione` | sì | `DATASPEDIZIONE` | Data di spedizione (erogazione) della ricetta |
@@ -219,7 +225,8 @@ Legenda:
 | `pinCode` | sì | `PINCODE` | PinCode inviante |
 | `codiceRegioneErogatore` | sì | `CODICEREGIONEEROGATORE` | Codice regione della struttura erogatrice |
 | `codiceAslErogatore` | sì | `CODICEASLEROGATORE` | Codice ASL della struttura erogatrice |
-| `codiceSsaErogatore` | sì | `CODICESSAEROGATORE` | Codice SSA della struttura erogatrice |
+| `codiceSsaErogatore` | condizionale | `CODICESSAEROGATORE` | **Obbligatorio in TEST** |
+| `codiceStruttura` | condizionale | `CODICESTRUTTURA`, `CODSTRUTTURA` | **Obbligatorio in PRODUZIONE** |
 | `nre` | sì | `NRE` | Numero Ricetta Elettronica |
 | `tipoOperazione` | sì | `TIPOOPERAZIONE` | 1 = Blocco esclusivo con restituzione dati ricetta, 2 = Blocco esclusivo senza restituzione dati, 3 = Rilascio ricetta, 4 = Visualizza dati oscurati |
 | `cfAssistito` | no | `CFASSISTITO` | Codice fiscale dell’assistito prelevato dalla Tessera Sanitaria |
@@ -232,7 +239,8 @@ Legenda:
 | `pinCode` | sì | `PINCODE` | PinCode inviante |
 | `codiceRegioneErogatore` | sì | `CODICEREGIONEEROGATORE` | Codice regione della struttura erogatrice |
 | `codiceAslErogatore` | sì | `CODICEASLEROGATORE` | Codice ASL della struttura erogatrice |
-| `codiceSsaErogatore` | sì | `CODICESSAEROGATORE` | Codice SSA della struttura erogatrice |
+| `codiceSsaErogatore` | condizionale | `CODICESSAEROGATORE` | **Obbligatorio in TEST** |
+| `codiceStruttura` | condizionale | `CODICESTRUTTURA`, `CODSTRUTTURA` | **Obbligatorio in PRODUZIONE** |
 | `nre` | sì | `NRE` | Numero Ricetta Elettronica |
 | `tipoOperazione` | sì | `TIPOOPERAZIONE` | 1 = Inizio sospensione, 2 = Revoca sospensione |
 
@@ -244,7 +252,8 @@ Legenda:
 | `pinCode` | sì | `PINCODE` | PinCode inviante |
 | `codiceRegioneErogatore` | sì | `CODICEREGIONEEROGATORE` | Codice regione della struttura erogatrice |
 | `codiceAslErogatore` | sì | `CODICEASLEROGATORE` | Codice ASL della struttura erogatrice |
-| `codiceSsaErogatore` | sì | `CODICESSAEROGATORE` | Codice SSA della struttura erogatrice |
+| `codiceSsaErogatore` | condizionale | `CODICESSAEROGATORE` | **Obbligatorio in TEST** |
+| `codiceStruttura` | condizionale | `CODICESTRUTTURA`, `CODSTRUTTURA` | **Obbligatorio in PRODUZIONE** |
 | `nre` | sì | `NRE` | Numero Ricetta Elettronica |
 | `codAnnullamento` | sì | `CODANNULLAMENTO` | Codice annullamento erogato |
 
@@ -256,7 +265,8 @@ Legenda:
 | `pinCode` | sì | `PINCODE` | PinCode inviante |
 | `codiceRegioneErogatore` | sì | `CODICEREGIONEEROGATORE` | Codice regione della struttura erogatrice |
 | `codiceAslErogatore` | sì | `CODICEASLEROGATORE` | Codice ASL della struttura erogatrice |
-| `codiceSsaErogatore` | sì | `CODICESSAEROGATORE` | Codice SSA della struttura erogatrice |
+| `codiceSsaErogatore` | condizionale | `CODICESSAEROGATORE` | **Obbligatorio in TEST** |
+| `codiceStruttura` | condizionale | `CODICESTRUTTURA`, `CODSTRUTTURA` | **Obbligatorio in PRODUZIONE** |
 
 **Altri campi presenti nell'XSD ma non normalizzati esplicitamente**
 - `pwd` = identificativo dell'utente che ha effettuato l'operazione
@@ -276,7 +286,8 @@ Legenda:
 | `pinCode` | sì | `PINCODE` | PinCode inviante |
 | `codiceRegioneErogatore` | sì | `CODICEREGIONEEROGATORE` | Codice regione della struttura erogatrice |
 | `codiceAslErogatore` | sì | `CODICEASLEROGATORE` | Codice ASL della struttura erogatrice |
-| `codiceSsaErogatore` | sì | `CODICESSAEROGATORE` | Codice SSA della struttura erogatrice |
+| `codiceSsaErogatore` | condizionale | `CODICESSAEROGATORE` | **Obbligatorio in TEST** |
+| `codiceStruttura` | condizionale | `CODICESTRUTTURA`, `CODSTRUTTURA` | **Obbligatorio in PRODUZIONE** |
 | `annoMese` | sì | `ANNOMESE` | Anno mese della richiesta nel formato AAAAMM |
 
 ---
@@ -304,11 +315,6 @@ Legenda:
 | `codiceSsaErogatore` | sì | `CODICESSAEROGATORE` | Codice SSA della struttura erogatrice |
 | `codMotivazione` | sì | `CODMOTIVAZIONE` | Codice motivazione del guasto |
 | `dataDal` | sì | `DATADAL` | Data di inizio del guasto-anomalia |
-
-**Altri campi presenti nell'XSD ma non normalizzati esplicitamente**
-- `pwd` = identificativo dell'utente che ha effettuato l'operazione
-- `note` = Note aggiuntive
-- `dispRic1`, `dispRic2`, `dispRic3` = Campo per futuro utilizzo
 
 ---
 
