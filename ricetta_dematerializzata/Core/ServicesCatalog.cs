@@ -100,7 +100,7 @@ namespace ricetta_dematerializzata.Core
             [DigitalPrescriptionService.AnnullaPrescritto] = new EndpointInfo(
                 "/DemRicettaPrescrittoServicesWeb/services/demAnnullaPrescritto",
                 "http://annullaprescritto.wsdl.dem.sanita.finanze.it/AnnullaPrescritto",
-                "AnnullaPrescritto",
+                "AnnullaPrescrittoRichiesta",
                 usaSslClientCert: false,
                 namespaceSoap: "http://annullaprescrittorichiesta.xsd.dem.sanita.finanze.it",
                 usaValidazioneCA: true,
@@ -273,6 +273,7 @@ namespace ricetta_dematerializzata.Core
         }
     }
 }
+
 
 
 
