@@ -48,11 +48,16 @@ namespace ricetta_dematerializzata_test_ui
 
             _kvLvInputP = CreateListView();
             _kvLvInputP.Location = new Point(10, 158);
+            _kvLvInputP.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _tabPrescrittore.Controls.Add(_kvLvInputP);
 
             _kvBtnAddInputP = CreateSideButton("➕ Aggiungi", new Point(860, 158), BtnAddInputP_Click);
             _kvBtnEditInputP = CreateSideButton("✏️ Modifica", new Point(860, 194), BtnEditInputP_Click);
             _kvBtnDeleteInputP = CreateSideButton("🗑 Elimina", new Point(860, 230), BtnDeleteInputP_Click);
+
+            _kvBtnAddInputP.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _kvBtnEditInputP.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _kvBtnDeleteInputP.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             _tabPrescrittore.Controls.Add(_kvBtnAddInputP);
             _tabPrescrittore.Controls.Add(_kvBtnEditInputP);
@@ -61,10 +66,13 @@ namespace ricetta_dematerializzata_test_ui
             _txtInputP.Visible = false;
 
             _btnChiamaP.Location = new Point(10, 450);
-            _btnDebugSoapP.Location = new Point(178, 450);
-            lblOutputP.Location = new Point(10, 498);
+            _btnDebugSoapP.Location = new Point(178, 450);          
             _txtOutputP.Location = new Point(10, 520);
-            _txtOutputP.Size = new Size(1005, 100);
+            _txtOutputP.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            _tabPrescrittore.Resize -= TabPrescrittore_Resize;
+            _tabPrescrittore.Resize += TabPrescrittore_Resize;
+            ApplyPrescrittoreLayout();
         }
 
         private void SetupErogatoreInputList()
@@ -73,11 +81,16 @@ namespace ricetta_dematerializzata_test_ui
 
             _kvLvInputE = CreateListView();
             _kvLvInputE.Location = new Point(10, 158);
+            _kvLvInputE.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             _tabErogatore.Controls.Add(_kvLvInputE);
 
             _kvBtnAddInputE = CreateSideButton("➕ Aggiungi", new Point(860, 158), BtnAddInputE_Click);
             _kvBtnEditInputE = CreateSideButton("✏️ Modifica", new Point(860, 194), BtnEditInputE_Click);
             _kvBtnDeleteInputE = CreateSideButton("🗑 Elimina", new Point(860, 230), BtnDeleteInputE_Click);
+
+            _kvBtnAddInputE.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _kvBtnEditInputE.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _kvBtnDeleteInputE.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             _tabErogatore.Controls.Add(_kvBtnAddInputE);
             _tabErogatore.Controls.Add(_kvBtnEditInputE);
@@ -86,10 +99,66 @@ namespace ricetta_dematerializzata_test_ui
             _txtInputE.Visible = false;
 
             _btnChiamaE.Location = new Point(10, 450);
-            _btnDebugSoapE.Location = new Point(178, 450);
-            lblOutputE.Location = new Point(10, 498);
+            _btnDebugSoapE.Location = new Point(178, 450);        
             _txtOutputE.Location = new Point(10, 520);
-            _txtOutputE.Size = new Size(1005, 100);
+            _txtOutputE.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+            _tabErogatore.Resize -= TabErogatore_Resize;
+            _tabErogatore.Resize += TabErogatore_Resize;
+            ApplyErogatoreLayout();
+        }
+
+        private void TabPrescrittore_Resize(object? sender, EventArgs e) => ApplyPrescrittoreLayout();
+
+        private void TabErogatore_Resize(object? sender, EventArgs e) => ApplyErogatoreLayout();
+
+        private void ApplyPrescrittoreLayout()
+        {
+            if (_kvLvInputP == null || _kvBtnAddInputP == null || _kvBtnEditInputP == null || _kvBtnDeleteInputP == null) return;
+
+            var rightButtonWidth = 155;
+            var margin = 10;
+            var topInput = 158;
+            var listHeight = 280;
+
+            _kvLvInputP.Location = new Point(margin, topInput);
+            _kvLvInputP.Size = new Size(Math.Max(300, _tabPrescrittore.ClientSize.Width - (margin * 3) - rightButtonWidth), listHeight);
+
+            var btnX = _tabPrescrittore.ClientSize.Width - margin - rightButtonWidth;
+            _kvBtnAddInputP.Location = new Point(btnX, topInput);
+            _kvBtnEditInputP.Location = new Point(btnX, topInput + 36);
+            _kvBtnDeleteInputP.Location = new Point(btnX, topInput + 72);
+
+            _btnChiamaP.Location = new Point(margin, topInput + listHeight + 12);
+            _btnDebugSoapP.Location = new Point(178, topInput + listHeight + 12);           
+            _txtOutputP.Size = new Size(
+                Math.Max(300, _tabPrescrittore.ClientSize.Width - (margin * 2)),
+                Math.Max(100, _tabPrescrittore.ClientSize.Height - _txtOutputP.Top - margin));
+        }
+
+        private void ApplyErogatoreLayout()
+        {
+            if (_kvLvInputE == null || _kvBtnAddInputE == null || _kvBtnEditInputE == null || _kvBtnDeleteInputE == null) return;
+
+            var rightButtonWidth = 155;
+            var margin = 10;
+            var topInput = 158;
+            var listHeight = 280;
+
+            _kvLvInputE.Location = new Point(margin, topInput);
+            _kvLvInputE.Size = new Size(Math.Max(300, _tabErogatore.ClientSize.Width - (margin * 3) - rightButtonWidth), listHeight);
+
+            var btnX = _tabErogatore.ClientSize.Width - margin - rightButtonWidth;
+            _kvBtnAddInputE.Location = new Point(btnX, topInput);
+            _kvBtnEditInputE.Location = new Point(btnX, topInput + 36);
+            _kvBtnDeleteInputE.Location = new Point(btnX, topInput + 72);
+
+            _btnChiamaE.Location = new Point(margin, topInput + listHeight + 12);
+            _btnDebugSoapE.Location = new Point(178, topInput + listHeight + 12);          
+            _txtOutputE.Location = new Point(margin, _btnDebugSoapE.Bottom + 2);
+            _txtOutputE.Size = new Size(
+                Math.Max(300, _tabErogatore.ClientSize.Width - (margin * 2)),
+                Math.Max(100, _tabErogatore.ClientSize.Height - _txtOutputE.Top - margin));
         }
 
         private static ListView CreateListView()

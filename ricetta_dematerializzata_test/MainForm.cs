@@ -2,6 +2,8 @@ using ricetta_dematerializzata.Core;
 using ricetta_dematerializzata.Models;
 using ricetta_dematerializzata.Services;
 using System;
+using System.Collections.Generic;
+using System.Text;
 using System.Windows.Forms;
 
 namespace ricetta_dematerializzata_test_ui
@@ -32,6 +34,37 @@ namespace ricetta_dematerializzata_test_ui
         private const string DefaultCodStrutturaServizi = "201600104";
         private const string DefaultCodRegioneServizi = "190";
         private const string DefaultCodAslAoServizi = "201";
+
+        private static readonly Dictionary<string, string> UpperAliasToCamel = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["USERID"] = "userId",
+            ["IDENTIFICATIVO"] = "identificativo",
+            ["CFUTENTE"] = "cfUtente",
+            ["CODREGIONE"] = "codRegione",
+            ["CODASLAO"] = "codAslAo",
+            ["CODSSA"] = "codSsa",
+            ["CODICESTRUTTURA"] = "codiceStruttura",
+            ["CONTESTO"] = "contesto",
+            ["APPLICAZIONE"] = "applicazione",
+            ["TOKEN"] = "token",
+            ["PINCODE"] = "pinCode",
+            ["NRE"] = "nre",
+            ["CFMEDICO"] = "cfMedico",
+            ["CFMEDICO1"] = "cfMedico1",
+            ["CFMEDICO2"] = "cfMedico2",
+            ["CFASSISTITO"] = "cfAssistito",
+            ["TIPOOPERAZIONE"] = "tipoOperazione",
+            ["CODICEREGIONEEROGATORE"] = "codiceRegioneErogatore",
+            ["CODICEASLEROGATORE"] = "codiceAslErogatore",
+            ["CODICESSAEROGATORE"] = "codiceSsaErogatore",
+            ["PRESCRIZIONEFRUITA"] = "prescrizioneFruita",
+            ["CODESITO"] = "codEsito",
+            ["ERRORE_NUMERO"] = "erroreNumero",
+            ["ERRORE_DESCRIZIONE"] = "erroreDescrizione",
+            ["DESCRIZIONE"] = "descrizione",
+            ["DATAINIZIOVALIDITA"] = "dataInizioValidita",
+            ["DATAFINEVALIDITA"] = "dataFineValidita"
+        };
 
         public MainForm()
         {
@@ -149,13 +182,13 @@ namespace ricetta_dematerializzata_test_ui
                 if (_chkProduzione.Checked)
                 {
                     // In produzione il token non è nella risposta: viene inviato via email all'utente
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [PRESCRITTORE] Richiesta token inviata.\r\nIl token verrà recapitato via email. Inserirlo manualmente.\r\n\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, "✅ [PRESCRITTORE] Richiesta token inviata. Il token verrà recapitato via email. Inserirlo manualmente.");
                     var token = ChiediTokenManuale("PRESCRITTORE");
                     if (!string.IsNullOrWhiteSpace(token))
                     {
                         _txtTokenP.Text = token;
                         TokenManager.SaveToken(token, "PRESCRITTORE");
-                        _txtA2FOutput.Text += $"\r\n\r\n🔑 Token inserito manualmente e salvato.";
+                        _txtA2FOutput.Text += Environment.NewLine + Environment.NewLine + "🔑 Token inserito manualmente e salvato.";
                     }
                 }
                 else
@@ -165,11 +198,11 @@ namespace ricetta_dematerializzata_test_ui
                     {
                         _txtTokenP.Text = token;
                         TokenManager.SaveToken(token, "PRESCRITTORE");
-                        _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [PRESCRITTORE] Token creato:\r\n{token}\r\n\r\n{result}";
+                        _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, $"✅ [PRESCRITTORE] Token creato: {token}");
                     }
                     else
                     {
-                        _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"⚠️ [PRESCRITTORE] Token non trovato:\r\n{result}";
+                        _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, "⚠️ [PRESCRITTORE] Token non trovato");
                     }
                 }
             }
@@ -188,12 +221,12 @@ namespace ricetta_dematerializzata_test_ui
                 if (IsA2FError(result))
                 {
                     AzzeraInfoValiditaP();
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"❌ [PRESCRITTORE] Token non valido:\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, "❌ [PRESCRITTORE] Token non valido");
                 }
                 else
                 {
                     PopolaInfoValidita(result, _txtStatoP, _txtInizioP, _txtFineP);
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [PRESCRITTORE] Token valido:\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, "✅ [PRESCRITTORE] Token valido");
                 }
             }
             catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
@@ -215,11 +248,11 @@ namespace ricetta_dematerializzata_test_ui
                     _txtTokenP.Text = string.Empty;
                     TokenManager.ClearToken("PRESCRITTORE");
                     AzzeraInfoValiditaP();
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [PRESCRITTORE] Token revocato:\r\n{desc}\r\n\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, $"✅ [PRESCRITTORE] Token revocato: {desc}");
                 }
                 else
                 {
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"❌ [PRESCRITTORE] Revoca fallita:\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, "❌ [PRESCRITTORE] Revoca fallita");
                 }
             }
             catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
@@ -250,13 +283,13 @@ namespace ricetta_dematerializzata_test_ui
                 if (_chkProduzione.Checked)
                 {
                     // In produzione il token non è nella risposta: viene inviato via email all'utente
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [EROGATORE] Richiesta token inviata.\r\nIl token verrà recapitato via email. Inserirlo manualmente.\r\n\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "✅ [EROGATORE] Richiesta token inviata. Il token verrà recapitato via email. Inserirlo manualmente.");
                     var token = ChiediTokenManuale("EROGATORE");
                     if (!string.IsNullOrWhiteSpace(token))
                     {
                         _txtTokenE.Text = token;
                         TokenManager.SaveToken(token, "EROGATORE");
-                        _txtA2FOutput.Text += $"\r\n\r\n🔑 Token inserito manualmente e salvato.";
+                        _txtA2FOutput.Text += Environment.NewLine + Environment.NewLine + "🔑 Token inserito manualmente e salvato.";
                     }
                 }
                 else
@@ -266,11 +299,11 @@ namespace ricetta_dematerializzata_test_ui
                     {
                         _txtTokenE.Text = token;
                         TokenManager.SaveToken(token, "EROGATORE");
-                        _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [EROGATORE] Token creato:\r\n{token}\r\n\r\n{result}";
+                        _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, $"✅ [EROGATORE] Token creato: {token}");
                     }
                     else
                     {
-                        _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"⚠️ [EROGATORE] Token non trovato:\r\n{result}";
+                        _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "⚠️ [EROGATORE] Token non trovato");
                     }
                 }
             }
@@ -289,12 +322,12 @@ namespace ricetta_dematerializzata_test_ui
                 if (IsA2FError(result))
                 {
                     AzzeraInfoValiditaE();
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"❌ [EROGATORE] Token non valido:\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "❌ [EROGATORE] Token non valido");
                 }
                 else
                 {
                     PopolaInfoValidita(result, _txtStatoE, _txtInizioE, _txtFineE);
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [EROGATORE] Token valido:\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "✅ [EROGATORE] Token valido");
                 }
             }
             catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
@@ -316,11 +349,11 @@ namespace ricetta_dematerializzata_test_ui
                     _txtTokenE.Text = string.Empty;
                     TokenManager.ClearToken("EROGATORE");
                     AzzeraInfoValiditaE();
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"✅ [EROGATORE] Token revocato:\r\n{desc}\r\n\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, $"✅ [EROGATORE] Token revocato: {desc}");
                 }
                 else
                 {
-                    _txtA2FOutput.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\n" + $"❌ [EROGATORE] Revoca fallita:\r\n{result}";
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "❌ [EROGATORE] Revoca fallita");
                 }
             }
             catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
@@ -348,7 +381,7 @@ namespace ricetta_dematerializzata_test_ui
                 var client = new RicettaDematerializzataBaseClient(config);
                 var input = _txtInputP.Text;
                 var result = client.Chiama((DigitalPrescriptionService)_cmbServizioP.SelectedItem!, input);
-                _txtOutputP.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\nRISPOSTA:\r\n" + result;
+                _txtOutputP.Text = FormatOutputSections("Servizi Prescrittore", input, result);
             }
             catch (Exception ex) { _txtOutputP.Text = $"❌ {ex.Message}"; }
         }
@@ -367,7 +400,7 @@ namespace ricetta_dematerializzata_test_ui
                 var client = new RicettaDematerializzataBaseClient(config);
                 var input = _txtInputE.Text;
                 var result = client.Chiama((DigitalPrescriptionService)_cmbServizioE.SelectedItem!, input);
-                _txtOutputE.Text = "INPUT PARAMETRI:\r\n" + input + "\r\n\r\nRISPOSTA:\r\n" + result;
+                _txtOutputE.Text = FormatOutputSections("Servizi Erogatore", input, result);
             }
             catch (Exception ex) { _txtOutputE.Text = $"❌ {ex.Message}"; }
         }
@@ -379,6 +412,70 @@ namespace ricetta_dematerializzata_test_ui
             => MostraDebug();
 
         // ── Helpers ───────────────────────────────────────────────────────────────
+
+        private static string FormatOutputSections(string title, string inputKv, string outputKv, string note = null)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(title);
+            if (!string.IsNullOrWhiteSpace(note))
+            {
+                sb.AppendLine(note);
+            }
+            sb.AppendLine();
+            sb.AppendLine("INPUT (camelCase)");
+            sb.AppendLine(FormatKvLines(inputKv, false));
+            sb.AppendLine();
+            sb.AppendLine("INPUT (ALIAS MAIUSCOLI)");
+            sb.AppendLine(FormatKvLines(inputKv, true));
+            sb.AppendLine();
+            sb.AppendLine("OUTPUT (camelCase)");
+            sb.AppendLine(FormatKvLines(outputKv, false));
+            sb.AppendLine();
+            sb.AppendLine("OUTPUT (ALIAS MAIUSCOLI)");
+            sb.AppendLine(FormatKvLines(outputKv, true));
+            return sb.ToString().TrimEnd();
+        }
+
+        private static string FormatKvLines(string kv, bool useUpperAlias)
+        {
+            var pairs = ParseKvPairs(kv);
+            if (pairs.Count == 0) return string.IsNullOrWhiteSpace(kv) ? string.Empty : kv.Trim();
+            var sb = new StringBuilder();
+            foreach (var pair in pairs)
+            {
+                var key = useUpperAlias ? ToUpperAlias(pair.Key) : ToCamelCaseKey(pair.Key);
+                sb.Append(key).Append("=").AppendLine(pair.Value);
+            }
+            return sb.ToString().TrimEnd();
+        }
+
+        private static List<KeyValuePair<string, string>> ParseKvPairs(string kv)
+        {
+            var result = new List<KeyValuePair<string, string>>();
+            if (string.IsNullOrWhiteSpace(kv)) return result;
+            var parts = kv.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var raw in parts)
+            {
+                var part = raw.Trim();
+                if (part.Length == 0) continue;
+                var idx = part.IndexOf('=');
+                if (idx <= 0) continue;
+                var k = part.Substring(0, idx).Trim();
+                var v = part.Substring(idx + 1).Trim();
+                result.Add(new KeyValuePair<string, string>(k, v));
+            }
+            return result;
+        }
+
+        private static string ToUpperAlias(string key)
+            => string.IsNullOrWhiteSpace(key) ? string.Empty : key.Replace("_", string.Empty).ToUpperInvariant();
+
+        private static string ToCamelCaseKey(string key)
+        {
+            if (string.IsNullOrWhiteSpace(key)) return string.Empty;
+            var upper = ToUpperAlias(key);
+            return UpperAliasToCamel.TryGetValue(upper, out var mapped) ? mapped : key;
+        }
 
         private void PopolaInfoValidita(string result,
             System.Windows.Forms.TextBox txtStato,

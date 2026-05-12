@@ -5,16 +5,6 @@ namespace ricetta_dematerializzata_test_ui
 {
     public partial class MainForm
     {
-        // ── Header condiviso ──────────────────────────────────────────────────────
-        private System.Windows.Forms.Label      lblUsername;
-        private System.Windows.Forms.TextBox    _txtUsername;
-        private System.Windows.Forms.Label      lblPassword;
-        private System.Windows.Forms.TextBox    _txtPassword;
-        private System.Windows.Forms.Label      lblUsernameE;
-        private System.Windows.Forms.TextBox    _txtUsernameE;
-        private System.Windows.Forms.Label      lblPasswordE;
-        private System.Windows.Forms.TextBox    _txtPasswordE;
-        private System.Windows.Forms.CheckBox   _chkProduzione;
 
         // ── TabControl principale ─────────────────────────────────────────────────
         private System.Windows.Forms.TabControl _tabControl;
@@ -54,7 +44,6 @@ namespace ricetta_dematerializzata_test_ui
 
         // ── Tab Token A2F – Output condiviso ──────────────────────────────────────
         private System.Windows.Forms.Button     _btnDebugSoapHeadersA2F;
-        private System.Windows.Forms.Label      lblA2FOutput;
         private System.Windows.Forms.TextBox    _txtA2FOutput;
 
         // ── Tab Servizi Prescrittore ───────────────────────────────────────────────
@@ -66,7 +55,6 @@ namespace ricetta_dematerializzata_test_ui
         private System.Windows.Forms.TextBox    _txtInputP;
         private System.Windows.Forms.Button     _btnChiamaP;
         private System.Windows.Forms.Button     _btnDebugSoapP;
-        private System.Windows.Forms.Label      lblOutputP;
         private System.Windows.Forms.TextBox    _txtOutputP;
 
         // ── Tab Servizi Erogatore ─────────────────────────────────────────────────
@@ -78,22 +66,14 @@ namespace ricetta_dematerializzata_test_ui
         private System.Windows.Forms.TextBox    _txtInputE;
         private System.Windows.Forms.Button     _btnChiamaE;
         private System.Windows.Forms.Button     _btnDebugSoapE;
-        private System.Windows.Forms.Label      lblOutputE;
         private System.Windows.Forms.TextBox    _txtOutputE;
 
         private void InitializeComponent()
         {
-            this.lblUsername = new System.Windows.Forms.Label();
-            this._txtUsername = new System.Windows.Forms.TextBox();
-            this.lblPassword = new System.Windows.Forms.Label();
-            this._txtPassword = new System.Windows.Forms.TextBox();
-            this.lblUsernameE = new System.Windows.Forms.Label();
-            this._txtUsernameE = new System.Windows.Forms.TextBox();
-            this.lblPasswordE = new System.Windows.Forms.Label();
-            this._txtPasswordE = new System.Windows.Forms.TextBox();
-            this._chkProduzione = new System.Windows.Forms.CheckBox();
             this._tabControl = new System.Windows.Forms.TabControl();
             this._tabToken = new System.Windows.Forms.TabPage();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this._btnDebugSoapHeadersA2F = new System.Windows.Forms.Button();
             this._grpTokenP = new System.Windows.Forms.GroupBox();
             this.lblTokenP = new System.Windows.Forms.Label();
             this._txtTokenP = new System.Windows.Forms.TextBox();
@@ -120,8 +100,6 @@ namespace ricetta_dematerializzata_test_ui
             this._txtInizioE = new System.Windows.Forms.TextBox();
             this.lblFineE = new System.Windows.Forms.Label();
             this._txtFineE = new System.Windows.Forms.TextBox();
-            this._btnDebugSoapHeadersA2F = new System.Windows.Forms.Button();
-            this.lblA2FOutput = new System.Windows.Forms.Label();
             this._txtA2FOutput = new System.Windows.Forms.TextBox();
             this._tabPrescrittore = new System.Windows.Forms.TabPage();
             this.lblServizioP = new System.Windows.Forms.Label();
@@ -132,7 +110,6 @@ namespace ricetta_dematerializzata_test_ui
             this._txtInputP = new System.Windows.Forms.TextBox();
             this._btnChiamaP = new System.Windows.Forms.Button();
             this._btnDebugSoapP = new System.Windows.Forms.Button();
-            this.lblOutputP = new System.Windows.Forms.Label();
             this._txtOutputP = new System.Windows.Forms.TextBox();
             this._tabErogatore = new System.Windows.Forms.TabPage();
             this.lblServizioE = new System.Windows.Forms.Label();
@@ -143,110 +120,71 @@ namespace ricetta_dematerializzata_test_ui
             this._txtInputE = new System.Windows.Forms.TextBox();
             this._btnChiamaE = new System.Windows.Forms.Button();
             this._btnDebugSoapE = new System.Windows.Forms.Button();
-            this.lblOutputE = new System.Windows.Forms.Label();
             this._txtOutputE = new System.Windows.Forms.TextBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.lblUsername = new System.Windows.Forms.Label();
+            this._txtUsername = new System.Windows.Forms.TextBox();
+            this.lblPassword = new System.Windows.Forms.Label();
+            this._txtPassword = new System.Windows.Forms.TextBox();
+            this.lblUsernameE = new System.Windows.Forms.Label();
+            this._txtUsernameE = new System.Windows.Forms.TextBox();
+            this.lblPasswordE = new System.Windows.Forms.Label();
+            this._txtPasswordE = new System.Windows.Forms.TextBox();
+            this._chkProduzione = new System.Windows.Forms.CheckBox();
             this._tabControl.SuspendLayout();
             this._tabToken.SuspendLayout();
+            this.panel2.SuspendLayout();
             this._grpTokenP.SuspendLayout();
             this._grpTokenE.SuspendLayout();
             this._tabPrescrittore.SuspendLayout();
             this._tabErogatore.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // lblUsername
-            // 
-            this.lblUsername.Location = new System.Drawing.Point(12, 14);
-            this.lblUsername.Name = "lblUsername";
-            this.lblUsername.Size = new System.Drawing.Size(70, 20);
-            this.lblUsername.TabIndex = 0;
-            this.lblUsername.Text = "User Presc.";
-            // 
-            // _txtUsername
-            // 
-            this._txtUsername.Location = new System.Drawing.Point(85, 11);
-            this._txtUsername.Name = "_txtUsername";
-            this._txtUsername.Size = new System.Drawing.Size(180, 20);
-            this._txtUsername.TabIndex = 0;
-            // 
-            // lblPassword
-            // 
-            this.lblPassword.Location = new System.Drawing.Point(278, 14);
-            this.lblPassword.Name = "lblPassword";
-            this.lblPassword.Size = new System.Drawing.Size(65, 20);
-            this.lblPassword.TabIndex = 1;
-            this.lblPassword.Text = "Pass Presc.";
-            // 
-            // _txtPassword
-            // 
-            this._txtPassword.Location = new System.Drawing.Point(346, 11);
-            this._txtPassword.Name = "_txtPassword";
-            this._txtPassword.PasswordChar = '●';
-            this._txtPassword.Size = new System.Drawing.Size(160, 20);
-            this._txtPassword.TabIndex = 1;
-            // 
-            // lblUsernameE
-            // 
-            this.lblUsernameE.Location = new System.Drawing.Point(12, 39);
-            this.lblUsernameE.Name = "lblUsernameE";
-            this.lblUsernameE.Size = new System.Drawing.Size(70, 20);
-            this.lblUsernameE.TabIndex = 2;
-            this.lblUsernameE.Text = "User Erog.";
-            // 
-            // _txtUsernameE
-            // 
-            this._txtUsernameE.Location = new System.Drawing.Point(85, 36);
-            this._txtUsernameE.Name = "_txtUsernameE";
-            this._txtUsernameE.Size = new System.Drawing.Size(180, 20);
-            this._txtUsernameE.TabIndex = 3;
-            // 
-            // lblPasswordE
-            // 
-            this.lblPasswordE.Location = new System.Drawing.Point(278, 39);
-            this.lblPasswordE.Name = "lblPasswordE";
-            this.lblPasswordE.Size = new System.Drawing.Size(65, 20);
-            this.lblPasswordE.TabIndex = 4;
-            this.lblPasswordE.Text = "Pass Erog.";
-            // 
-            // _txtPasswordE
-            // 
-            this._txtPasswordE.Location = new System.Drawing.Point(346, 36);
-            this._txtPasswordE.Name = "_txtPasswordE";
-            this._txtPasswordE.PasswordChar = '●';
-            this._txtPasswordE.Size = new System.Drawing.Size(160, 20);
-            this._txtPasswordE.TabIndex = 5;
-            // 
-            // _chkProduzione
-            // 
-            this._chkProduzione.Location = new System.Drawing.Point(525, 36);
-            this._chkProduzione.Name = "_chkProduzione";
-            this._chkProduzione.Size = new System.Drawing.Size(105, 20);
-            this._chkProduzione.TabIndex = 6;
-            this._chkProduzione.Text = "Produzione";
             // 
             // _tabControl
             // 
             this._tabControl.Controls.Add(this._tabToken);
             this._tabControl.Controls.Add(this._tabPrescrittore);
             this._tabControl.Controls.Add(this._tabErogatore);
-            this._tabControl.Location = new System.Drawing.Point(12, 69);
+            this._tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._tabControl.Location = new System.Drawing.Point(0, 65);
             this._tabControl.Name = "_tabControl";
             this._tabControl.SelectedIndex = 0;
-            this._tabControl.Size = new System.Drawing.Size(1040, 680);
-            this._tabControl.TabIndex = 4;
+            this._tabControl.Size = new System.Drawing.Size(1064, 676);
+            this._tabControl.TabIndex = 2;
             // 
             // _tabToken
             // 
+            this._tabToken.Controls.Add(this.panel2);
             this._tabToken.Controls.Add(this._grpTokenP);
             this._tabToken.Controls.Add(this._grpTokenE);
-            this._tabToken.Controls.Add(this._btnDebugSoapHeadersA2F);
-            this._tabToken.Controls.Add(this.lblA2FOutput);
             this._tabToken.Controls.Add(this._txtA2FOutput);
             this._tabToken.Location = new System.Drawing.Point(4, 22);
             this._tabToken.Name = "_tabToken";
             this._tabToken.Padding = new System.Windows.Forms.Padding(8);
-            this._tabToken.Size = new System.Drawing.Size(1032, 654);
+            this._tabToken.Size = new System.Drawing.Size(1056, 650);
             this._tabToken.TabIndex = 0;
             this._tabToken.Text = "Token A2F";
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this._btnDebugSoapHeadersA2F);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel2.Location = new System.Drawing.Point(8, 298);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(1040, 41);
+            this.panel2.TabIndex = 7;
+            // 
+            // _btnDebugSoapHeadersA2F
+            // 
+            this._btnDebugSoapHeadersA2F.BackColor = System.Drawing.Color.LightYellow;
+            this._btnDebugSoapHeadersA2F.Location = new System.Drawing.Point(3, 3);
+            this._btnDebugSoapHeadersA2F.Name = "_btnDebugSoapHeadersA2F";
+            this._btnDebugSoapHeadersA2F.Size = new System.Drawing.Size(150, 30);
+            this._btnDebugSoapHeadersA2F.TabIndex = 5;
+            this._btnDebugSoapHeadersA2F.Text = "🔍 Debug SOAP";
+            this._btnDebugSoapHeadersA2F.UseVisualStyleBackColor = false;
+            this._btnDebugSoapHeadersA2F.Click += new System.EventHandler(this.BtnDebugSoapHeadersA2F_Click);
             // 
             // _grpTokenP
             // 
@@ -262,10 +200,11 @@ namespace ricetta_dematerializzata_test_ui
             this._grpTokenP.Controls.Add(this._txtInizioP);
             this._grpTokenP.Controls.Add(this.lblFineP);
             this._grpTokenP.Controls.Add(this._txtFineP);
+            this._grpTokenP.Dock = System.Windows.Forms.DockStyle.Top;
             this._grpTokenP.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this._grpTokenP.Location = new System.Drawing.Point(10, 8);
+            this._grpTokenP.Location = new System.Drawing.Point(8, 153);
             this._grpTokenP.Name = "_grpTokenP";
-            this._grpTokenP.Size = new System.Drawing.Size(1005, 145);
+            this._grpTokenP.Size = new System.Drawing.Size(1040, 145);
             this._grpTokenP.TabIndex = 0;
             this._grpTokenP.TabStop = false;
             this._grpTokenP.Text = "Prescrittore (PRESCRITTORE)";
@@ -402,10 +341,11 @@ namespace ricetta_dematerializzata_test_ui
             this._grpTokenE.Controls.Add(this._txtInizioE);
             this._grpTokenE.Controls.Add(this.lblFineE);
             this._grpTokenE.Controls.Add(this._txtFineE);
+            this._grpTokenE.Dock = System.Windows.Forms.DockStyle.Top;
             this._grpTokenE.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this._grpTokenE.Location = new System.Drawing.Point(10, 162);
+            this._grpTokenE.Location = new System.Drawing.Point(8, 8);
             this._grpTokenE.Name = "_grpTokenE";
-            this._grpTokenE.Size = new System.Drawing.Size(1005, 145);
+            this._grpTokenE.Size = new System.Drawing.Size(1040, 145);
             this._grpTokenE.TabIndex = 1;
             this._grpTokenE.TabStop = false;
             this._grpTokenE.Text = "Erogatore (EROGATORE)";
@@ -528,34 +468,18 @@ namespace ricetta_dematerializzata_test_ui
             this._txtFineE.TabIndex = 10;
             this._txtFineE.TabStop = false;
             // 
-            // _btnDebugSoapHeadersA2F
-            // 
-            this._btnDebugSoapHeadersA2F.BackColor = System.Drawing.Color.LightYellow;
-            this._btnDebugSoapHeadersA2F.Location = new System.Drawing.Point(10, 316);
-            this._btnDebugSoapHeadersA2F.Name = "_btnDebugSoapHeadersA2F";
-            this._btnDebugSoapHeadersA2F.Size = new System.Drawing.Size(150, 30);
-            this._btnDebugSoapHeadersA2F.TabIndex = 5;
-            this._btnDebugSoapHeadersA2F.Text = "🔍 Debug SOAP";
-            this._btnDebugSoapHeadersA2F.UseVisualStyleBackColor = false;
-            this._btnDebugSoapHeadersA2F.Click += new System.EventHandler(this.BtnDebugSoapHeadersA2F_Click);
-            // 
-            // lblA2FOutput
-            // 
-            this.lblA2FOutput.Location = new System.Drawing.Point(10, 355);
-            this.lblA2FOutput.Name = "lblA2FOutput";
-            this.lblA2FOutput.Size = new System.Drawing.Size(100, 20);
-            this.lblA2FOutput.TabIndex = 6;
-            this.lblA2FOutput.Text = "Risposta A2F";
-            // 
             // _txtA2FOutput
             // 
+            this._txtA2FOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this._txtA2FOutput.Font = new System.Drawing.Font("Courier New", 9F);
-            this._txtA2FOutput.Location = new System.Drawing.Point(10, 377);
+            this._txtA2FOutput.Location = new System.Drawing.Point(13, 345);
             this._txtA2FOutput.Multiline = true;
             this._txtA2FOutput.Name = "_txtA2FOutput";
             this._txtA2FOutput.ReadOnly = true;
             this._txtA2FOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this._txtA2FOutput.Size = new System.Drawing.Size(1005, 248);
+            this._txtA2FOutput.Size = new System.Drawing.Size(1032, 297);
             this._txtA2FOutput.TabIndex = 6;
             this._txtA2FOutput.WordWrap = false;
             // 
@@ -569,12 +493,11 @@ namespace ricetta_dematerializzata_test_ui
             this._tabPrescrittore.Controls.Add(this._txtInputP);
             this._tabPrescrittore.Controls.Add(this._btnChiamaP);
             this._tabPrescrittore.Controls.Add(this._btnDebugSoapP);
-            this._tabPrescrittore.Controls.Add(this.lblOutputP);
             this._tabPrescrittore.Controls.Add(this._txtOutputP);
             this._tabPrescrittore.Location = new System.Drawing.Point(4, 22);
             this._tabPrescrittore.Name = "_tabPrescrittore";
             this._tabPrescrittore.Padding = new System.Windows.Forms.Padding(8);
-            this._tabPrescrittore.Size = new System.Drawing.Size(1032, 654);
+            this._tabPrescrittore.Size = new System.Drawing.Size(1056, 650);
             this._tabPrescrittore.TabIndex = 1;
             this._tabPrescrittore.Text = "Servizi Prescrittore";
             // 
@@ -648,23 +571,18 @@ namespace ricetta_dematerializzata_test_ui
             this._btnDebugSoapP.UseVisualStyleBackColor = false;
             this._btnDebugSoapP.Click += new System.EventHandler(this.BtnDebugSoapP_Click);
             // 
-            // lblOutputP
-            // 
-            this.lblOutputP.Location = new System.Drawing.Point(10, 240);
-            this.lblOutputP.Name = "lblOutputP";
-            this.lblOutputP.Size = new System.Drawing.Size(60, 20);
-            this.lblOutputP.TabIndex = 5;
-            this.lblOutputP.Text = "Output";
-            // 
             // _txtOutputP
             // 
+            this._txtOutputP.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this._txtOutputP.Font = new System.Drawing.Font("Courier New", 9F);
-            this._txtOutputP.Location = new System.Drawing.Point(10, 262);
+            this._txtOutputP.Location = new System.Drawing.Point(10, 230);
             this._txtOutputP.Multiline = true;
             this._txtOutputP.Name = "_txtOutputP";
             this._txtOutputP.ReadOnly = true;
             this._txtOutputP.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this._txtOutputP.Size = new System.Drawing.Size(1005, 358);
+            this._txtOutputP.Size = new System.Drawing.Size(1035, 409);
             this._txtOutputP.TabIndex = 5;
             this._txtOutputP.WordWrap = false;
             // 
@@ -678,12 +596,11 @@ namespace ricetta_dematerializzata_test_ui
             this._tabErogatore.Controls.Add(this._txtInputE);
             this._tabErogatore.Controls.Add(this._btnChiamaE);
             this._tabErogatore.Controls.Add(this._btnDebugSoapE);
-            this._tabErogatore.Controls.Add(this.lblOutputE);
             this._tabErogatore.Controls.Add(this._txtOutputE);
             this._tabErogatore.Location = new System.Drawing.Point(4, 22);
             this._tabErogatore.Name = "_tabErogatore";
             this._tabErogatore.Padding = new System.Windows.Forms.Padding(8);
-            this._tabErogatore.Size = new System.Drawing.Size(1032, 654);
+            this._tabErogatore.Size = new System.Drawing.Size(1056, 650);
             this._tabErogatore.TabIndex = 2;
             this._tabErogatore.Text = "Servizi Erogatore";
             // 
@@ -757,47 +674,123 @@ namespace ricetta_dematerializzata_test_ui
             this._btnDebugSoapE.UseVisualStyleBackColor = false;
             this._btnDebugSoapE.Click += new System.EventHandler(this.BtnDebugSoapE_Click);
             // 
-            // lblOutputE
-            // 
-            this.lblOutputE.Location = new System.Drawing.Point(10, 240);
-            this.lblOutputE.Name = "lblOutputE";
-            this.lblOutputE.Size = new System.Drawing.Size(60, 20);
-            this.lblOutputE.TabIndex = 5;
-            this.lblOutputE.Text = "Output";
-            // 
             // _txtOutputE
             // 
+            this._txtOutputE.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this._txtOutputE.Font = new System.Drawing.Font("Courier New", 9F);
-            this._txtOutputE.Location = new System.Drawing.Point(10, 262);
+            this._txtOutputE.Location = new System.Drawing.Point(10, 230);
             this._txtOutputE.Multiline = true;
             this._txtOutputE.Name = "_txtOutputE";
             this._txtOutputE.ReadOnly = true;
             this._txtOutputE.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this._txtOutputE.Size = new System.Drawing.Size(1005, 358);
+            this._txtOutputE.Size = new System.Drawing.Size(1035, 409);
             this._txtOutputE.TabIndex = 5;
             this._txtOutputE.WordWrap = false;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.lblUsername);
+            this.panel1.Controls.Add(this._txtUsername);
+            this.panel1.Controls.Add(this.lblPassword);
+            this.panel1.Controls.Add(this._txtPassword);
+            this.panel1.Controls.Add(this.lblUsernameE);
+            this.panel1.Controls.Add(this._txtUsernameE);
+            this.panel1.Controls.Add(this.lblPasswordE);
+            this.panel1.Controls.Add(this._txtPasswordE);
+            this.panel1.Controls.Add(this._chkProduzione);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1064, 65);
+            this.panel1.TabIndex = 1;
+            // 
+            // lblUsername
+            // 
+            this.lblUsername.Location = new System.Drawing.Point(14, 13);
+            this.lblUsername.Name = "lblUsername";
+            this.lblUsername.Size = new System.Drawing.Size(70, 20);
+            this.lblUsername.TabIndex = 7;
+            this.lblUsername.Text = "User Presc.";
+            // 
+            // _txtUsername
+            // 
+            this._txtUsername.Location = new System.Drawing.Point(87, 10);
+            this._txtUsername.Name = "_txtUsername";
+            this._txtUsername.Size = new System.Drawing.Size(180, 20);
+            this._txtUsername.TabIndex = 8;
+            // 
+            // lblPassword
+            // 
+            this.lblPassword.Location = new System.Drawing.Point(280, 13);
+            this.lblPassword.Name = "lblPassword";
+            this.lblPassword.Size = new System.Drawing.Size(65, 20);
+            this.lblPassword.TabIndex = 9;
+            this.lblPassword.Text = "Pass Presc.";
+            // 
+            // _txtPassword
+            // 
+            this._txtPassword.Location = new System.Drawing.Point(348, 10);
+            this._txtPassword.Name = "_txtPassword";
+            this._txtPassword.PasswordChar = '●';
+            this._txtPassword.Size = new System.Drawing.Size(160, 20);
+            this._txtPassword.TabIndex = 10;
+            // 
+            // lblUsernameE
+            // 
+            this.lblUsernameE.Location = new System.Drawing.Point(14, 38);
+            this.lblUsernameE.Name = "lblUsernameE";
+            this.lblUsernameE.Size = new System.Drawing.Size(70, 20);
+            this.lblUsernameE.TabIndex = 11;
+            this.lblUsernameE.Text = "User Erog.";
+            // 
+            // _txtUsernameE
+            // 
+            this._txtUsernameE.Location = new System.Drawing.Point(87, 35);
+            this._txtUsernameE.Name = "_txtUsernameE";
+            this._txtUsernameE.Size = new System.Drawing.Size(180, 20);
+            this._txtUsernameE.TabIndex = 12;
+            // 
+            // lblPasswordE
+            // 
+            this.lblPasswordE.Location = new System.Drawing.Point(280, 38);
+            this.lblPasswordE.Name = "lblPasswordE";
+            this.lblPasswordE.Size = new System.Drawing.Size(65, 20);
+            this.lblPasswordE.TabIndex = 13;
+            this.lblPasswordE.Text = "Pass Erog.";
+            // 
+            // _txtPasswordE
+            // 
+            this._txtPasswordE.Location = new System.Drawing.Point(348, 35);
+            this._txtPasswordE.Name = "_txtPasswordE";
+            this._txtPasswordE.PasswordChar = '●';
+            this._txtPasswordE.Size = new System.Drawing.Size(160, 20);
+            this._txtPasswordE.TabIndex = 14;
+            // 
+            // _chkProduzione
+            // 
+            this._chkProduzione.Location = new System.Drawing.Point(527, 35);
+            this._chkProduzione.Name = "_chkProduzione";
+            this._chkProduzione.Size = new System.Drawing.Size(105, 20);
+            this._chkProduzione.TabIndex = 15;
+            this._chkProduzione.Text = "Produzione";
             // 
             // MainForm
             // 
             this.ClientSize = new System.Drawing.Size(1064, 741);
-            this.Controls.Add(this.lblUsername);
-            this.Controls.Add(this._txtUsername);
-            this.Controls.Add(this.lblPassword);
-            this.Controls.Add(this._txtPassword);
-            this.Controls.Add(this.lblUsernameE);
-            this.Controls.Add(this._txtUsernameE);
-            this.Controls.Add(this.lblPasswordE);
-            this.Controls.Add(this._txtPasswordE);
-            this.Controls.Add(this._chkProduzione);
             this.Controls.Add(this._tabControl);
+            this.Controls.Add(this.panel1);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.MinimumSize = new System.Drawing.Size(1080, 780);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Ricetta Dematerializzata - Test Client";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this._tabControl.ResumeLayout(false);
             this._tabToken.ResumeLayout(false);
             this._tabToken.PerformLayout();
+            this.panel2.ResumeLayout(false);
             this._grpTokenP.ResumeLayout(false);
             this._grpTokenP.PerformLayout();
             this._grpTokenE.ResumeLayout(false);
@@ -806,9 +799,22 @@ namespace ricetta_dematerializzata_test_ui
             this._tabPrescrittore.PerformLayout();
             this._tabErogatore.ResumeLayout(false);
             this._tabErogatore.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
+
+        private Panel panel1;
+        private Label lblUsername;
+        private TextBox _txtUsername;
+        private Label lblPassword;
+        private TextBox _txtPassword;
+        private Label lblUsernameE;
+        private TextBox _txtUsernameE;
+        private Label lblPasswordE;
+        private TextBox _txtPasswordE;
+        private CheckBox _chkProduzione;
+        private Panel panel2;
     }
 }
