@@ -1,8 +1,10 @@
 using ricetta_dematerializzata.Core;
+using ricetta_dematerializzata.Crypto;
 using ricetta_dematerializzata.Models;
 using ricetta_dematerializzata.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
@@ -18,22 +20,31 @@ namespace ricetta_dematerializzata_test_ui
         // Credenziali dedicate ai servizi EROGATORE
         private const string DefaultUsernameErogatore = "TSTSIC00B01H501E";
         private const string DefaultPasswordErogatore = "Salve123";
-        private const string DefaultPinCodeErogatore = "TSTSIC00B01H501E";
+        private const string DefaultPinCodeErogatore  = "TSTSIC00B01H501E";
         private const string DefaultCodRegioneErogatore = "190";
-        private const string DefaultCodAslErogatore = "201";
-        private const string DefaultCodSsaErogatore = "888888";
+        private const string DefaultCodAslErogatore     = "201";
+        private const string DefaultCodSsaErogatore     = "888888";
 
-        // Input default A2F
-        private const string DefaultUserId = "PROVAX00X00X000Y";
-        private const string DefaultCfUtente = "PROVAX00X00X000Y";
-        private const string DefaultIdentBase64 = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=";
-        private const string DefaultCodRegioneAuth = "130";
-        private const string DefaultCodAslAoAuth = "202";
-        private const string DefaultCodSsaAuth = "000000";
-        private const string DefaultCodStrutturaToken = "";
+        // Input default A2F – PRESCRITTORE
+        private const string DefaultA2FUserIdP      = "PROVAX00X00X000Y";
+        private const string DefaultA2FCodRegioneP  = "130";
+        private const string DefaultA2FCodAslAoP    = "202";
+        private const string DefaultA2FCodSsaP      = "000000";
+        private const string DefaultA2FStrutturaP   = "";
+        private const string DefaultA2FIdentP       = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=";
+
+        // Input default A2F – EROGATORE
+        private const string DefaultA2FUserIdE      = "TSTSIC00B01H501E";
+        private const string DefaultA2FCodRegioneE  = "190";
+        private const string DefaultA2FCodAslAoE    = "201";
+        private const string DefaultA2FCodSsaE      = "000000";
+        private const string DefaultA2FStrutturaE   = "";
+        private const string DefaultA2FIdentE       = "LsQiYtf7FcpMYVKvf+51V6t1BSUk+E/dGOB2vmwNl0DhirZ8QzvTI2Ay04p6+t+eH+DjzkJpXrlEEZvKRz6wKVNOt7uYSQUYKBIFcbcEQJnqT7zTgtz7jV3BK+QaEphfKRsOP1Iejv+vKvJ/3te2xNMHPkNYZIAjxEQHftw9Swk=";
+
+        // Default servizi (non-token)
         private const string DefaultCodStrutturaServizi = "201600104";
-        private const string DefaultCodRegioneServizi = "190";
-        private const string DefaultCodAslAoServizi = "201";
+        private const string DefaultCodRegioneServizi   = "190";
+        private const string DefaultCodAslAoServizi     = "201";
 
         private static readonly Dictionary<string, string> UpperAliasToCamel = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -70,10 +81,26 @@ namespace ricetta_dematerializzata_test_ui
         {
             InitializeComponent();
 
-            _txtUsername.Text = DefaultUsername;
-            _txtPassword.Text = DefaultPassword;
+            _txtUsername.Text  = DefaultUsername;
+            _txtPassword.Text  = DefaultPassword;
             _txtUsernameE.Text = DefaultUsernameErogatore;
             _txtPasswordE.Text = DefaultPasswordErogatore;
+
+            // Parametri A2F – Prescrittore
+            _txtA2FUserIdP.Text     = DefaultA2FUserIdP;
+            _txtA2FCodRegioneP.Text = DefaultA2FCodRegioneP;
+            _txtA2FCodAslP.Text     = DefaultA2FCodAslAoP;
+            _txtA2FCodSsaP.Text     = DefaultA2FCodSsaP;
+            _txtA2FStrutturaP.Text  = DefaultA2FStrutturaP;
+            _txtA2FIdentP.Text      = DefaultA2FIdentP;
+
+            // Parametri A2F – Erogatore
+            _txtA2FUserIdE.Text     = DefaultA2FUserIdE;
+            _txtA2FCodRegioneE.Text = DefaultA2FCodRegioneE;
+            _txtA2FCodAslE.Text     = DefaultA2FCodAslAoE;
+            _txtA2FCodSsaE.Text     = DefaultA2FCodSsaE;
+            _txtA2FStrutturaE.Text  = DefaultA2FStrutturaE;
+            _txtA2FIdentE.Text      = DefaultA2FIdentE;
 
             // Combo servizi prescrittore
             _cmbServizioP.DataSource = new[]
@@ -106,6 +133,12 @@ namespace ricetta_dematerializzata_test_ui
             _txtInputE.Text = GetDefaultInput(DigitalPrescriptionService.InvioErogato);
 
             LoadTokensFromStorage();
+
+            // Inizializza il path del certificato Sanitel nel tab Cifra PinCode
+            var certDefault = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "certificates", "SanitelCF-2024-2027.cer");
+            if (!File.Exists(certDefault))
+                certDefault = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "certificates", "SanitelCF.cer");
+            _txtCifraCert.Text = certDefault;
         }
 
         // ── Configurazione ────────────────────────────────────────────────────────
@@ -130,9 +163,9 @@ namespace ricetta_dematerializzata_test_ui
 
             return new ServiceConfiguration
             {
-                Username        = username,
-                Password        = password,
-                Ambiente        = ambiente,
+                Username = username,
+                Password = password,
+                Ambiente = ambiente,
                 Authorization2F = auth2F
             };
         }
@@ -159,11 +192,20 @@ namespace ricetta_dematerializzata_test_ui
         {
             var t = skipToken ? "" : token;
             var isErogatore = string.Equals(applicazione, "EROGATORE", StringComparison.OrdinalIgnoreCase);
-            var userId = isErogatore ? DefaultUsernameErogatore : DefaultUserId;
-            var cfUtente = isErogatore ? DefaultUsernameErogatore : DefaultCfUtente;
-            return $"userId={userId};identificativo={DefaultIdentBase64};cfUtente={cfUtente}"
-                 + $";codRegione={DefaultCodRegioneAuth};codAslAo={DefaultCodAslAoAuth};codSsa={DefaultCodSsaAuth}"
-                 + $";codiceStruttura={DefaultCodStrutturaToken};contesto=RICETTA-DEM;applicazione={applicazione}"
+            var isProduzione = _chkProduzione.Checked;
+
+            var userId        = isErogatore ? _txtA2FUserIdE.Text.Trim()     : _txtA2FUserIdP.Text.Trim();
+            var codRegione    = isErogatore ? _txtA2FCodRegioneE.Text.Trim()  : _txtA2FCodRegioneP.Text.Trim();
+            var codAslAo      = isErogatore ? _txtA2FCodAslE.Text.Trim()      : _txtA2FCodAslP.Text.Trim();
+            var codSsa        = isErogatore ? _txtA2FCodSsaE.Text.Trim()      : _txtA2FCodSsaP.Text.Trim();
+            var struttura     = isErogatore ? _txtA2FStrutturaE.Text.Trim()   : _txtA2FStrutturaP.Text.Trim();
+            var identificativo = isErogatore ? _txtA2FIdentE.Text.Trim()      : _txtA2FIdentP.Text.Trim();
+
+            var codSsaPart = isProduzione ? "" : $";codSsa={codSsa}";
+
+            return $"userId={userId};identificativo={identificativo};cfUtente={userId}"
+                 + $";codRegione={codRegione};codAslAo={codAslAo}{codSsaPart}"
+                 + $";codiceStruttura={struttura};contesto=RICETTA-DEM;applicazione={applicazione}"
                  + (string.IsNullOrWhiteSpace(t) ? "" : $";token={t}");
         }
 
@@ -178,6 +220,12 @@ namespace ricetta_dematerializzata_test_ui
                 var client = new Auth2FClient(config);
                 var input = BuildA2FInput("PRESCRITTORE", skipToken: true);
                 var result = client.Create(input);
+
+                if (IsA2FError(result))
+                {
+                    _txtA2FOutput.Text = FormatOutputSections("A2F Prescrittore", input, result, "❌ [PRESCRITTORE] Errore nella richiesta token");
+                    return;
+                }
 
                 if (_chkProduzione.Checked)
                 {
@@ -280,16 +328,22 @@ namespace ricetta_dematerializzata_test_ui
                 var input = BuildA2FInput("EROGATORE", skipToken: true);
                 var result = client.Create(input);
 
+                if (IsA2FError(result))
+                {
+                    _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, "❌ [EROGATORE] Errore nella richiesta token");
+                    return;
+                }
+
                 if (_chkProduzione.Checked)
                 {
                     // In produzione il token non è nella risposta: viene inviato via email all'utente
-                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "✅ [EROGATORE] Richiesta token inviata. Il token verrà recapitato via email. Inserirlo manualmente.");
+                    _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, "✅ [EROGATORE] Richiesta token inviata. Il token verrà recapitato via email. Inserirlo manualmente.");
                     var token = ChiediTokenManuale("EROGATORE");
                     if (!string.IsNullOrWhiteSpace(token))
                     {
                         _txtTokenE.Text = token;
                         TokenManager.SaveToken(token, "EROGATORE");
-                        _txtA2FOutput.Text += Environment.NewLine + Environment.NewLine + "🔑 Token inserito manualmente e salvato.";
+                        _txtA2FOutputE.Text += Environment.NewLine + Environment.NewLine + "🔑 Token inserito manualmente e salvato.";
                     }
                 }
                 else
@@ -299,21 +353,21 @@ namespace ricetta_dematerializzata_test_ui
                     {
                         _txtTokenE.Text = token;
                         TokenManager.SaveToken(token, "EROGATORE");
-                        _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, $"✅ [EROGATORE] Token creato: {token}");
+                        _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, $"✅ [EROGATORE] Token creato: {token}");
                     }
                     else
                     {
-                        _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "⚠️ [EROGATORE] Token non trovato");
+                        _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, "⚠️ [EROGATORE] Token non trovato");
                     }
                 }
             }
-            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
+            catch (Exception ex) { _txtA2FOutputE.Text = $"❌ {ex.Message}"; }
         }
 
         private void BtnCheckTokenE_Click(object sender, EventArgs e)
         {
             if (!ValidaCredenziali()) return;
-            if (string.IsNullOrWhiteSpace(_txtTokenE.Text)) { _txtA2FOutput.Text = "❌ Nessun token EROGATORE."; return; }
+            if (string.IsNullOrWhiteSpace(_txtTokenE.Text)) { _txtA2FOutputE.Text = "❌ Nessun token EROGATORE."; return; }
             try
             {
                 var client = new Auth2FClient(BuildConfig("EROGATORE"));
@@ -322,21 +376,21 @@ namespace ricetta_dematerializzata_test_ui
                 if (IsA2FError(result))
                 {
                     AzzeraInfoValiditaE();
-                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "❌ [EROGATORE] Token non valido");
+                    _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, "❌ [EROGATORE] Token non valido");
                 }
                 else
                 {
                     PopolaInfoValidita(result, _txtStatoE, _txtInizioE, _txtFineE);
-                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "✅ [EROGATORE] Token valido");
+                    _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, "✅ [EROGATORE] Token valido");
                 }
             }
-            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
+            catch (Exception ex) { _txtA2FOutputE.Text = $"❌ {ex.Message}"; }
         }
 
         private void BtnRevokeTokenE_Click(object sender, EventArgs e)
         {
             if (!ValidaCredenziali()) return;
-            if (string.IsNullOrWhiteSpace(_txtTokenE.Text)) { _txtA2FOutput.Text = "❌ Nessun token EROGATORE."; return; }
+            if (string.IsNullOrWhiteSpace(_txtTokenE.Text)) { _txtA2FOutputE.Text = "❌ Nessun token EROGATORE."; return; }
             try
             {
                 var client = new Auth2FClient(BuildConfig("EROGATORE"));
@@ -349,14 +403,14 @@ namespace ricetta_dematerializzata_test_ui
                     _txtTokenE.Text = string.Empty;
                     TokenManager.ClearToken("EROGATORE");
                     AzzeraInfoValiditaE();
-                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, $"✅ [EROGATORE] Token revocato: {desc}");
+                    _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, $"✅ [EROGATORE] Token revocato: {desc}");
                 }
                 else
                 {
-                    _txtA2FOutput.Text = FormatOutputSections("A2F Erogatore", input, result, "❌ [EROGATORE] Revoca fallita");
+                    _txtA2FOutputE.Text = FormatOutputSections("A2F Erogatore", input, result, "❌ [EROGATORE] Revoca fallita");
                 }
             }
-            catch (Exception ex) { _txtA2FOutput.Text = $"❌ {ex.Message}"; }
+            catch (Exception ex) { _txtA2FOutputE.Text = $"❌ {ex.Message}"; }
         }
 
         private void BtnInsertTokenE_Click(object sender, EventArgs e)
@@ -380,8 +434,12 @@ namespace ricetta_dematerializzata_test_ui
                 var config = BuildConfig("PRESCRITTORE");
                 var client = new RicettaDematerializzataBaseClient(config);
                 var input = _txtInputP.Text;
-                var result = client.Chiama((DigitalPrescriptionService)_cmbServizioP.SelectedItem!, input);
+                var servizio = (DigitalPrescriptionService)_cmbServizioP.SelectedItem!;
+                var result = client.Chiama(servizio, input);
                 _txtOutputP.Text = FormatOutputSections("Servizi Prescrittore", input, result);
+
+                if (servizio == DigitalPrescriptionService.InvioPrescritto)
+                    TrySavePdfPromemoria(result);
             }
             catch (Exception ex) { _txtOutputP.Text = $"❌ {ex.Message}"; }
         }
@@ -410,6 +468,46 @@ namespace ricetta_dematerializzata_test_ui
 
         private void BtnDebugSoapHeadersA2F_Click(object sender, EventArgs e)
             => MostraDebug();
+
+        private void TrySavePdfPromemoria(string resultKv)
+        {
+            try
+            {
+                var dict = ParserKV.Parse(resultKv);
+                if (!dict.TryGetValue("PDFPROMEMORIA", out var pdfBase64) || string.IsNullOrWhiteSpace(pdfBase64))
+                    return;
+
+                byte[] pdfBytes;
+                try
+                {
+                    pdfBytes = Convert.FromBase64String(pdfBase64.Trim());
+                }
+                catch
+                {
+                    MessageBox.Show("Il campo PDFPROMEMORIA non contiene un Base64 valido.", "PDF promemoria", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using var sfd = new SaveFileDialog
+                {
+                    Title = "Salva PDF promemoria",
+                    Filter = "PDF (*.pdf)|*.pdf|Tutti i file (*.*)|*.*",
+                    DefaultExt = "pdf",
+                    AddExtension = true,
+                    FileName = $"Promemoria_{DateTime.Now:yyyyMMdd_HHmmss}.pdf"
+                };
+
+                if (sfd.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                File.WriteAllBytes(sfd.FileName, pdfBytes);
+                MessageBox.Show($"PDF salvato in:\n{sfd.FileName}", "PDF promemoria", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Errore salvataggio PDFPROMEMORIA: {ex.Message}", "PDF promemoria", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -528,7 +626,9 @@ namespace ricetta_dematerializzata_test_ui
         {
             if (string.IsNullOrWhiteSpace(result)) return true;
             var d = ParserKV.Parse(result);
+            // Controlla sia ERRORE_NUMERO (formato standard) sia ERRORENUMERO (SOAP Fault serializzato)
             if (d.ContainsKey("ERRORE_NUMERO")) return true;
+            if (d.ContainsKey("ERRORENUMERO")) return true;
             if (d.TryGetValue("CODESITO", out var esito) && esito != "0") return true;
             return false;
         }
@@ -555,7 +655,7 @@ namespace ricetta_dematerializzata_test_ui
                 DigitalPrescriptionService.VisualizzaPrescritto =>
                     "pinCode=1234567890;nre=120000000000;cfMedico=PROVAX00X00X000Y",
                 DigitalPrescriptionService.InvioPrescritto =>
-                    $"pinCode=1234567890;cfMedico1=PROVAX00X00X000Y;codRegione={DefaultCodRegioneServizi};codASLAo={DefaultCodAslAoServizi};codStruttura={DefaultCodStrutturaServizi};codSpecializzazione=P;codiceAss={DefaultCfAssistito};tipoPrescrizione=P;nonEsente=1;codDiagnosi=401.9;descrizioneDiagnosi=IPERTENSIONE ARTERIOSA ESSENZIALE;dataCompilazione={DateTime.Now:yyyy-MM-dd HH:mm:ss};tipoVisita=A;classePriorita=P;provAssistito=AG;aslAssistito=201;ElencoDettagliPrescrizioni=ARRAY;ElencoDettagliPrescrizioni_1_codProdPrest=89.7;ElencoDettagliPrescrizioni_1_descrProdPrest=VISITA CARDIOLOGICA;ElencoDettagliPrescrizioni_1_quantita=1;ElencoDettagliPrescrizioni_1_tipoAccesso=1;ElencoDettagliPrescrizioni_2_codProdPrest=89.52;ElencoDettagliPrescrizioni_2_descrProdPrest=ELETTROCARDIOGRAMMA (ECG) BASALE;ElencoDettagliPrescrizioni_2_quantita=1;ElencoDettagliPrescrizioni_2_tipoAccesso=1",
+                    $"pinCode=1234567890;cfMedico1=PROVAX00X00X000Y;codRegione={DefaultCodRegioneServizi};codASLAo={DefaultCodAslAoServizi};codStruttura={DefaultCodStrutturaServizi};codSpecializzazione=P;codiceAss={DefaultCfAssistito};tipoPrescrizione=P;nonEsente=1;codDiagnosi=401.9;descrizioneDiagnosi=IPERTENSIONE ARTERIOSA ESSENZIALE;dataCompilazione={DateTime.Now:yyyy-MM-dd HH:mm:ss};tipoVisita=A;classePriorita=P;provAssistito=AG;aslAssistito=201;ElencoDettagliPrescrizioni=ARRAY;ElencoDettagliPrescrizioni_1_codProdPrest=89.7;ElencoDettagliPrescrizioni_1_codCatalogoPrescr=89.7;ElencoDettagliPrescrizioni_1_descrProdPrest=VISITA CARDIOLOGICA;ElencoDettagliPrescrizioni_1_quantita=1;ElencoDettagliPrescrizioni_1_tipoAccesso=1;ElencoDettagliPrescrizioni_2_codProdPrest=89.52;ElencoDettagliPrescrizioni_2_codCatalogoPrescr=89.52;ElencoDettagliPrescrizioni_2_descrProdPrest=ELETTROCARDIOGRAMMA (ECG) BASALE;ElencoDettagliPrescrizioni_2_quantita=1;ElencoDettagliPrescrizioni_2_tipoAccesso=1",
                 DigitalPrescriptionService.AnnullaPrescritto =>
                     "pinCode=1234567890;nre=120000000000;cfMedico=PROVAX00X00X000Y",
                 DigitalPrescriptionService.InterrogaNreUtilizzati =>
@@ -565,7 +665,7 @@ namespace ricetta_dematerializzata_test_ui
                 DigitalPrescriptionService.InvioDichiarazioneSostituzioneMedico =>
                     $"pinCode=1234567890;pwd=UTENTE;cfMedicoTitolare=PROVAX00X00X000Y;codRegione={DefaultCodRegioneServizi};codASLAo={DefaultCodAslAoServizi};codSpecializzazione=P;cfMedicoSostituto=RSSMRA80A01H501T;dataInizioSostituzione=2026-01-01;dataFineSostituzione=2026-01-31",
                 DigitalPrescriptionService.InvioErogato =>
-                    $"pinCode={DefaultPinCodeErogatore};codiceRegioneErogatore={DefaultCodRegioneErogatore};codiceAslErogatore={DefaultCodAslErogatore};codiceSsaErogatore={DefaultCodSsaErogatore};pwd={DefaultUsernameErogatore};nre=120000000000;cfAssistito={DefaultCfAssistito};tipoOperazione=1;prescrizioneFruita=1;dataSpedizione={DateTime.Now:yyyy-MM-dd HH:mm:ss};ElencoDettagliPrescrInviiErogato=ARRAY;ElencoDettagliPrescrInviiErogato_1_codProdPrest=89.7;ElencoDettagliPrescrInviiErogato_1_codProdPrestErog=89.7;ElencoDettagliPrescrInviiErogato_1_descrProdPrestErog=VISITA CARDIOLOGICA;ElencoDettagliPrescrInviiErogato_1_prezzo=36.15;ElencoDettagliPrescrInviiErogato_1_quantitaErogata=1;ElencoDettagliPrescrInviiErogato_1_dataIniErog={DateTime.Now:yyyy-MM-dd HH:mm:ss};ElencoDettagliPrescrInviiErogato_1_dataFineErog={DateTime.Now:yyyy-MM-dd HH:mm:ss}",
+                    $"pinCode={DefaultPinCodeErogatore};codiceRegioneErogatore={DefaultCodRegioneErogatore};codiceAslErogatore={DefaultCodAslErogatore};codiceSsaErogatore={DefaultCodSsaErogatore};pwd={DefaultUsernameErogatore};nre=120000000000;cfAssistito={DefaultCfAssistito};tipoOperazione=1;prescrizioneFruita=1;dataSpedizione={DateTime.Now:yyyy-MM-dd HH:mm:ss};ElencoDettagliPrescrInviiErogato=ARRAY;ElencoDettagliPrescrInviiErogato_1_codProdPrest=89.7;ElencoDettagliPrescrInviiErogato_1_codCatalogoPrescr=89.7;ElencoDettagliPrescrInviiErogato_1_codProdPrestErog=89.7;ElencoDettagliPrescrInviiErogato_1_descrProdPrestErog=VISITA CARDIOLOGICA;ElencoDettagliPrescrInviiErogato_1_prezzo=36.15;ElencoDettagliPrescrInviiErogato_1_quantitaErogata=1;ElencoDettagliPrescrInviiErogato_1_dataIniErog={DateTime.Now:yyyy-MM-dd HH:mm:ss};ElencoDettagliPrescrInviiErogato_1_dataFineErog={DateTime.Now:yyyy-MM-dd HH:mm:ss}",
                 DigitalPrescriptionService.VisualizzaErogato =>
                     $"pinCode={DefaultPinCodeErogatore};codiceRegioneErogatore={DefaultCodRegioneErogatore};codiceAslErogatore={DefaultCodAslErogatore};codiceSsaErogatore={DefaultCodSsaErogatore};nre=1900A4005322015;tipoOperazione=1;cfAssistito={DefaultCfAssistito}",
                 DigitalPrescriptionService.SospendiErogato =>
@@ -607,7 +707,7 @@ namespace ricetta_dematerializzata_test_ui
             };
             var lbl = new Label { Text = $"Il token è stato inviato via email. Incollarlo qui:", Left = 12, Top = 12, Width = 460 };
             var txt = new TextBox { Left = 12, Top = 34, Width = 460, Font = new System.Drawing.Font("Courier New", 9f) };
-            var btnOk     = new Button { Text = "OK",     Left = 308, Top = 68, Width = 80, DialogResult = DialogResult.OK };
+            var btnOk = new Button { Text = "OK", Left = 308, Top = 68, Width = 80, DialogResult = DialogResult.OK };
             var btnAnnulla = new Button { Text = "Annulla", Left = 394, Top = 68, Width = 80, DialogResult = DialogResult.Cancel };
             form.AcceptButton = btnOk;
             form.CancelButton = btnAnnulla;
@@ -640,13 +740,79 @@ namespace ricetta_dematerializzata_test_ui
             form.Controls.Add(btn);
             form.ShowDialog(this);
         }
+
+        // ── Tab Cifra PinCode ─────────────────────────────────────────────────────
+
+        private void BtnCifraCercaCert_Click(object sender, EventArgs e)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Seleziona certificato Sanitel (.cer)",
+                Filter = "Certificati X.509 (*.cer;*.crt)|*.cer;*.crt|Tutti i file (*.*)|*.*",
+                CheckFileExists = true,
+            };
+            if (!string.IsNullOrWhiteSpace(_txtCifraCert.Text) && File.Exists(_txtCifraCert.Text))
+                dlg.InitialDirectory = Path.GetDirectoryName(_txtCifraCert.Text);
+
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+                _txtCifraCert.Text = dlg.FileName;
+        }
+
+        private void BtnCifra_Click(object sender, EventArgs e)
+        {
+            var testo = _txtCifraTesto.Text.Trim();
+            var cert  = _txtCifraCert.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(testo))
+            {
+                MessageBox.Show("Inserire il testo da cifrare (PinCode / CF assistito).", "Campo obbligatorio", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(cert) || !File.Exists(cert))
+            {
+                MessageBox.Show($"Certificato non trovato:\n{cert}\n\nUsare il pulsante 🔍 Cerca Cert per selezionarlo.", "Certificato mancante", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            try
+            {
+                _txtCifraRisultato.Text = string.Empty;
+                lblCifraInfo.Text = "⏳ Cifratura in corso...";
+                lblCifraInfo.ForeColor = System.Drawing.Color.DarkBlue;
+                Refresh();
+
+                var cifrato = OpenSSLEncoding.CifraConCertificato(testo, cert);
+                _txtCifraRisultato.Text = cifrato;
+
+                var certObj = new System.Security.Cryptography.X509Certificates.X509Certificate2(File.ReadAllBytes(cert));
+                lblCifraInfo.Text = $"✅ Cifrato con: {certObj.Subject} — Scadenza: {certObj.GetExpirationDateString()} — Testo originale: {testo.Length} char → {cifrato.Length} char Base64";
+                lblCifraInfo.ForeColor = System.Drawing.Color.DarkGreen;
+            }
+            catch (Exception ex)
+            {
+                lblCifraInfo.Text = $"❌ Errore: {ex.Message}";
+                lblCifraInfo.ForeColor = System.Drawing.Color.DarkRed;
+                _txtCifraRisultato.Text = string.Empty;
+            }
+        }
+
+        private void BtnCifraCopia_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(_txtCifraRisultato.Text))
+            {
+                MessageBox.Show("Nessun risultato da copiare. Eseguire prima la cifratura.", "Nessun risultato", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            try
+            {
+                Clipboard.SetText(_txtCifraRisultato.Text);
+                MessageBox.Show("Risultato copiato negli appunti.", "Copiato", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Impossibile copiare: {ex.Message}", "Errore", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }
-
-
-
-
-
-
-
-

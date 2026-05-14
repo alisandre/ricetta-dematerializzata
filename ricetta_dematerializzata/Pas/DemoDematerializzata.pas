@@ -183,11 +183,13 @@ begin
   // Dettagli prescrizione — riga 1
   Result := KVSet(Result, 'ElencoDettagliPrescrizioni', 'ARRAY');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 1, 'codProdPrest',    '89.7');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 1, 'codCatalogoPrescr','89.7');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 1, 'descrProdPrest',  'VISITA CARDIOLOGICA');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 1, 'quantita',        '1');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 1, 'tipoAccesso',     '1');
   // Dettagli prescrizione — riga 2
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'codProdPrest',    '89.52');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'codCatalogoPrescr','89.52');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'descrProdPrest',  'ELETTROCARDIOGRAMMA (ECG) BASALE');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'quantita',        '1');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrizioni', 2, 'tipoAccesso',     '1');
@@ -303,6 +305,7 @@ begin
 
   Result := KVSet(Result, 'ElencoDettagliPrescrInviiErogato', 'ARRAY');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'codProdPrest',        '89.7');
+  Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'codCatalogoPrescr',   '89.7');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'codProdPrestErog',    '89.7');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'descrProdPrestErog',  'VISITA CARDIOLOGICA');
   Result := KVSetArrayNode(Result, 'ElencoDettagliPrescrInviiErogato', 1, 'prezzo',              '36.15');
@@ -392,7 +395,7 @@ begin
   try
 
     // ── 1. Configurazione ──────────────────────────────────────────────────
-    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, Seriale, Ambiente);
+    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, Seriale, Ambiente, 'Error');
 
     // ── 2. Verifica token già presente in memoria ──────────────────────────
     TokenGiaValido := False;
@@ -486,7 +489,7 @@ begin
 
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, Seriale, Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, Seriale, Ambiente, 'Error');
 
     // 1) Presa in carico ricetta
     VisualizzaOutput := Client.Chiama(SRV_VISUALIZZA_EROGATO, BuildVisualizzaErogatoInput);
@@ -524,7 +527,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_VISUALIZZA_PRESCRITTO, BuildVisualizzaPrescrittoInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ VisualizzaPrescritto fallita: ' + KVGetErroreDescrizione(Output))
@@ -545,7 +548,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_INTERROGA_NRE_UTILIZZATI, BuildInterrogaNreUtilizzatiInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ InterrogaNreUtilizzati fallita: ' + KVGetErroreDescrizione(Output))
@@ -566,7 +569,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_USERNAME, DEMO_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_SERVICE_ANAG_PRESCRITTORE, BuildServiceAnagPrescrittoreInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ ServiceAnagPrescrittore fallita: ' + KVGetErroreDescrizione(Output))
@@ -589,7 +592,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_SOSPENDI_EROGATO, BuildSospendiErogatoInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ SospendiErogato fallita: ' + KVGetErroreDescrizione(Output))
@@ -610,7 +613,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_ANNULLA_EROGATO, BuildAnnullaErogatoInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ AnnullaErogato fallita: ' + KVGetErroreDescrizione(Output))
@@ -631,7 +634,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_RICERCA_EROGATORE, BuildRicercaErogatoreInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ RicercaErogatore fallita: ' + KVGetErroreDescrizione(Output))
@@ -652,7 +655,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_REPORT_EROGATO_MENSILE, BuildReportErogatoMensileInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ ReportErogatoMensile fallita: ' + KVGetErroreDescrizione(Output))
@@ -673,7 +676,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_SERVICE_ANAG_EROGATORE, BuildServiceAnagErogatoreInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ ServiceAnagErogatore fallita: ' + KVGetErroreDescrizione(Output))
@@ -694,7 +697,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_RICETTA_DIFFERITA, BuildRicettaDifferitaInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ RicettaDifferita fallita: ' + KVGetErroreDescrizione(Output))
@@ -715,7 +718,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_ANNULLA_EROGATO_DIFF, BuildAnnullaErogatoDiffInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ AnnullaErogatoDiff fallita: ' + KVGetErroreDescrizione(Output))
@@ -736,7 +739,7 @@ begin
   Ambiente := IfThen(IsTest, AMB_TEST, AMB_PRODUZIONE);
   Client := TRicettaDematerializzataClient.Create;
   try
-    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente);
+    Client.Configura(DEMO_EROG_USERNAME, DEMO_EROG_PASSWORD, '', Ambiente, 'Error');
     Output := Client.Chiama(SRV_RICEVUTE_SAC, BuildRicevuteSacInput);
     if KVIsErrore(Output) then
       ShowMessage('❌ RicevuteSac fallita: ' + KVGetErroreDescrizione(Output))

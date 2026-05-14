@@ -345,8 +345,8 @@ Per l'erogatore il flusso applicativo raccomandato è:
 
 **Regola identificativi erogatore (validata in esercizio)**
 - **TEST**: inviare `codiceSsaErogatore`
-- **PRODUZIONE**: inviare `codiceStruttura`
-- In **PRODUZIONE** i due campi sono alternativi esclusivi: se si invia `codiceStruttura`, `codiceSsaErogatore` non deve comparire nella request (nemmeno vuoto).
+- **PRODUZIONE**: inviare **uno solo** tra `codiceSsaErogatore` e `codiceStruttura`
+- In **PRODUZIONE** i due campi sono alternativi esclusivi: se si invia uno, l'altro non deve comparire nella request (nemmeno vuoto).
 
 ### 1) VisualizzaErogato (presa in carico)
 

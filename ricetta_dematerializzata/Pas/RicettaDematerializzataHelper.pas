@@ -100,8 +100,10 @@ type
     /// Ambiente: AMB_TEST (0) o AMB_PRODUZIONE (1).
     /// Seriale: seriale esadecimale del certificato nel Windows Certificate Store.
     ///          Se vuoto, viene usata solo la Basic Auth.
+    /// LogLevel: Verbose|Debug|Information|Warning|Error|Fatal (default Error).
     function Configura(const Username, Password, Seriale: string;
-                       Ambiente: Integer = AMB_TEST): Boolean;
+                       Ambiente: Integer = AMB_TEST;
+                       const LogLevel: string = 'Error'): Boolean;
 
     procedure ConfiguraAuthorization2F(const Authorization2F: string);
     function Chiama(Servizio: Integer; const Input: string): string;
@@ -277,11 +279,12 @@ begin
 end;
 
 function TRicettaDematerializzataClient.Configura(const Username, Password, Seriale: string;
-                                         Ambiente: Integer): Boolean;
+                                         Ambiente: Integer;
+                                         const LogLevel: string): Boolean;
 begin
   Result := False;
   try
-    FClient.Configura(Username, Password, Seriale, Ambiente);
+    FClient.Configura(Username, Password, Seriale, Ambiente, LogLevel);
     FInizializzato := True;
     Result := True;
   except

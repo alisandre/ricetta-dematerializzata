@@ -14,7 +14,7 @@ namespace ricetta_dematerializzata.Services
     ///   2. uses ricetta_dematerializzata_TLB;
     ///   3. var client: IRicettaDematerializzataClient;
     ///      client := CoRicettaDematerializzataClient.Create;
-    ///      client.Configura('user', 'pass', 0, True);
+    ///      client.Configura('user', 'pass', '', 0, 'Error');
     ///      result := client.Chiama(2, 'NRE=12345;CF=RSSMRA...');
     /// </summary>
     [ComVisible(true)]
@@ -22,8 +22,8 @@ namespace ricetta_dematerializzata.Services
     [InterfaceType(ComInterfaceType.InterfaceIsDual)]
     public interface IRicettaDematerializzataClient
     {
-        /// <summary>Configura credenziali, certificato SSL (da seriale) e ambiente. Metodo principale.</summary>
-        void Configura(string username, string password, string seriale = "", int ambiente = 0);
+        /// <summary>Configura credenziali, certificato SSL (da seriale), ambiente e livello log. Metodo principale.</summary>
+        void Configura(string username, string password, string seriale = "", int ambiente = 0, string logLevel = "Error");
 
         /// <summary>Imposta il valore Authorization2F (ID-SESSIONE o Bearer completo)</summary>
         void ConfiguraAuthorization2F(string? authorization2F);

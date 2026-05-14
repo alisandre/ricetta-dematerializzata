@@ -127,8 +127,8 @@ Output errore:
 
 **Regola identificativi erogatore (validata in esercizio)**
 - **TEST**: usare `codiceSsaErogatore`
-- **PRODUZIONE**: usare `codiceStruttura`
-- In **PRODUZIONE** i due campi sono alternativi esclusivi: se si invia `codiceStruttura`, `codiceSsaErogatore` non va inviato (nemmeno vuoto).
+- **PRODUZIONE**: inviare **uno solo** tra `codiceSsaErogatore` e `codiceStruttura`
+- In **PRODUZIONE** i due campi sono alternativi esclusivi: se si invia uno, l'altro non va inviato (nemmeno vuoto).
 
 ### Authorization 2D (A2F)
 
@@ -147,17 +147,20 @@ Output errore:
 ```csharp
 // C# — con SerialeCertificatoSsl (se disponibile) o senza (solo Basic Auth)
 var client = new RicettaDematerializzataBaseClient();
-client.Configura("utente", "password", "F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D", ambiente: 1);
+client.Configura("utente", "password", "F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D", ambiente: 1, logLevel: "Error");
 // Senza certificato (solo Basic Auth):
-// client.Configura("utente", "password", "", ambiente: 0);
+// client.Configura("utente", "password", "", ambiente: 0, logLevel: "Information");
 ```
 
 ```pascal
 { Delphi }
-client.Configura('utente', 'password', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE);
+client.Configura('utente', 'password', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE, 'Error');
 { Senza certificato: }
-{ client.Configura('utente', 'password', '', AMB_TEST); }
+{ client.Configura('utente', 'password', '', AMB_TEST, 'Information'); }
 ```
+
+**Livelli log supportati**: `Verbose`, `Debug`, `Information`, `Warning`, `Error`, `Fatal`.
+Se assente o non valido, viene usato `Error`.
 
 **Comportamento automatico per ambiente:**
 
@@ -213,7 +216,7 @@ Per deregistrare:
 
 ### 2) API pubblica
 
-- `Configura(username, password, seriale, ambiente)` — configurazione principale
+- `Configura(username, password, seriale, ambiente, logLevel)` — configurazione principale
 - `ConfiguraAuthorization2F(tokenOrBearer)` — token A2F da usare sui servizi DEM (prescrittore/erogatore)
 - `Chiama(servizio, parametriInputKV)` — chiamata servizio (inclusi A2F con codici `20/21/22`)
 - `ChiamaJson(servizio, parametriInputJson)` — chiamata con I/O JSON

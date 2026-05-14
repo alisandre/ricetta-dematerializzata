@@ -19,7 +19,7 @@ namespace ricetta_dematerializzata.Core
         /// </summary>
         private static string GetSoapLogDirectory()
         {
-            var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs", "SOAP");
+            var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Log", "Xml");
             if (!Directory.Exists(logPath))
             {
                 try
@@ -59,6 +59,9 @@ namespace ricetta_dematerializzata.Core
 
                     System.Diagnostics.Debug.WriteLine(logText.ToString());
                     Console.WriteLine(logText.ToString());
+
+                    // ── Serilog ───────────────────────────────────────────────────────────
+                    RicettaLogger.LogSoapRequest(methodName, url, soapAction, FormatXml(soapEnvelope));
 
                     SaveSoapEnvelopeToFile(
                         $"01_Request_{methodName}_{timestamp:yyyyMMdd_HHmmss_fff}",
@@ -103,6 +106,9 @@ namespace ricetta_dematerializzata.Core
 
                     System.Diagnostics.Debug.WriteLine(logText.ToString());
                     Console.WriteLine(logText.ToString());
+
+                    // ── Serilog ───────────────────────────────────────────────────────────
+                    RicettaLogger.LogSoapResponse(methodName, httpStatusCode, elapsedMilliseconds, FormatXml(soapEnvelope));
 
                     SaveSoapEnvelopeToFile(
                         $"02_Response_{methodName}_{timestamp:yyyyMMdd_HHmmss_fff}",
@@ -160,6 +166,10 @@ namespace ricetta_dematerializzata.Core
 
                     System.Diagnostics.Debug.WriteLine(logText.ToString());
                     Console.WriteLine(logText.ToString());
+
+                    // ── Serilog ───────────────────────────────────────────────────────────
+                    RicettaLogger.LogErrore(methodName, string.Empty, exception,
+                        soapEnvelope != null ? FormatXml(soapEnvelope) : null);
 
                     if (!string.IsNullOrEmpty(soapEnvelope))
                     {

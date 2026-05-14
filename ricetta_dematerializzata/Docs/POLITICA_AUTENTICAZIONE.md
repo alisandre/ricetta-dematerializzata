@@ -57,14 +57,17 @@ client.Configura(
     username: "MIO_UTENTE",
     password: "MIA_PASSWORD",
     seriale: "F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D",  // vuoto = solo Basic Auth
-    ambiente: 1   // 0=Test, 1=Produzione
+    ambiente: 1,   // 0=Test, 1=Produzione
+    logLevel: "Error"
 );
 ```
 
 ```pascal
 // Delphi — metodo principale
-client.Configura('MIO_UTENTE', 'MIA_PASSWORD', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE);
+client.Configura('MIO_UTENTE', 'MIA_PASSWORD', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE, 'Error');
 ```
+
+Livelli log supportati: `Verbose`, `Debug`, `Information`, `Warning`, `Error`, `Fatal` (default `Error`).
 
 **SSL automatico per ambiente**:
 - **Test**: validazione SSL server disabilitata automaticamente

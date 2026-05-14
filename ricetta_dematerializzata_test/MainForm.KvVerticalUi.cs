@@ -11,15 +11,17 @@ namespace ricetta_dematerializzata_test_ui
     {
         private bool _kvUiInitialized;
 
-        private ListView? _kvLvInputP;
+        private TreeView? _kvTreeInputP;
         private Button? _kvBtnAddInputP;
         private Button? _kvBtnEditInputP;
         private Button? _kvBtnDeleteInputP;
+        private Button? _kvBtnCloneInputP;
 
-        private ListView? _kvLvInputE;
+        private TreeView? _kvTreeInputE;
         private Button? _kvBtnAddInputE;
         private Button? _kvBtnEditInputE;
         private Button? _kvBtnDeleteInputE;
+        private Button? _kvBtnCloneInputE;
 
         protected override void OnLoad(EventArgs e)
         {
@@ -35,40 +37,38 @@ namespace ricetta_dematerializzata_test_ui
             SetupPrescrittoreInputList();
             SetupErogatoreInputList();
 
-            LoadListFromInput(_txtInputP, _kvLvInputP!);
-            LoadListFromInput(_txtInputE, _kvLvInputE!);
+            LoadTreeFromInput(_txtInputP, _kvTreeInputP!);
+            LoadTreeFromInput(_txtInputE, _kvTreeInputE!);
 
-            _txtInputP.TextChanged += (s, e) => LoadListFromInput(_txtInputP, _kvLvInputP!);
-            _txtInputE.TextChanged += (s, e) => LoadListFromInput(_txtInputE, _kvLvInputE!);
+            _txtInputP.TextChanged += (s, e) => LoadTreeFromInput(_txtInputP, _kvTreeInputP!);
+            _txtInputE.TextChanged += (s, e) => LoadTreeFromInput(_txtInputE, _kvTreeInputE!);
         }
 
         private void SetupPrescrittoreInputList()
         {
-            lblInputP.Text = "Input (lista key/value)";
+            lblInputP.Text = "Input (TreeView key/value)";
 
-            _kvLvInputP = CreateListView();
-            _kvLvInputP.Location = new Point(10, 158);
-            _kvLvInputP.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _tabPrescrittore.Controls.Add(_kvLvInputP);
+            _kvTreeInputP = CreateTreeView();
+            _kvTreeInputP.Location = new Point(10, 188);
+            _kvTreeInputP.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _tabPrescrittore.Controls.Add(_kvTreeInputP);
 
-            _kvBtnAddInputP = CreateSideButton("➕ Aggiungi", new Point(860, 158), BtnAddInputP_Click);
-            _kvBtnEditInputP = CreateSideButton("✏️ Modifica", new Point(860, 194), BtnEditInputP_Click);
-            _kvBtnDeleteInputP = CreateSideButton("🗑 Elimina", new Point(860, 230), BtnDeleteInputP_Click);
+            _kvBtnAddInputP = CreateSideButton("➕ Aggiungi", new Point(860, 188), BtnAddInputP_Click);
+            _kvBtnEditInputP = CreateSideButton("✏️ Modifica", new Point(860, 224), BtnEditInputP_Click);
+            _kvBtnDeleteInputP = CreateSideButton("🗑 Elimina", new Point(860, 260), BtnDeleteInputP_Click);
+            _kvBtnCloneInputP = CreateSideButton("📄 Clona", new Point(860, 296), BtnCloneInputP_Click);
 
             _kvBtnAddInputP.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _kvBtnEditInputP.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _kvBtnDeleteInputP.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _kvBtnCloneInputP.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             _tabPrescrittore.Controls.Add(_kvBtnAddInputP);
             _tabPrescrittore.Controls.Add(_kvBtnEditInputP);
             _tabPrescrittore.Controls.Add(_kvBtnDeleteInputP);
+            _tabPrescrittore.Controls.Add(_kvBtnCloneInputP);
 
             _txtInputP.Visible = false;
-
-            _btnChiamaP.Location = new Point(10, 450);
-            _btnDebugSoapP.Location = new Point(178, 450);          
-            _txtOutputP.Location = new Point(10, 520);
-            _txtOutputP.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             _tabPrescrittore.Resize -= TabPrescrittore_Resize;
             _tabPrescrittore.Resize += TabPrescrittore_Resize;
@@ -77,31 +77,29 @@ namespace ricetta_dematerializzata_test_ui
 
         private void SetupErogatoreInputList()
         {
-            lblInputE.Text = "Input (lista key/value)";
+            lblInputE.Text = "Input (TreeView key/value)";
 
-            _kvLvInputE = CreateListView();
-            _kvLvInputE.Location = new Point(10, 158);
-            _kvLvInputE.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            _tabErogatore.Controls.Add(_kvLvInputE);
+            _kvTreeInputE = CreateTreeView();
+            _kvTreeInputE.Location = new Point(10, 188);
+            _kvTreeInputE.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _tabErogatore.Controls.Add(_kvTreeInputE);
 
-            _kvBtnAddInputE = CreateSideButton("➕ Aggiungi", new Point(860, 158), BtnAddInputE_Click);
-            _kvBtnEditInputE = CreateSideButton("✏️ Modifica", new Point(860, 194), BtnEditInputE_Click);
-            _kvBtnDeleteInputE = CreateSideButton("🗑 Elimina", new Point(860, 230), BtnDeleteInputE_Click);
+            _kvBtnAddInputE = CreateSideButton("➕ Aggiungi", new Point(860, 188), BtnAddInputE_Click);
+            _kvBtnEditInputE = CreateSideButton("✏️ Modifica", new Point(860, 224), BtnEditInputE_Click);
+            _kvBtnDeleteInputE = CreateSideButton("🗑 Elimina", new Point(860, 260), BtnDeleteInputE_Click);
+            _kvBtnCloneInputE = CreateSideButton("📄 Clona", new Point(860, 296), BtnCloneInputE_Click);
 
             _kvBtnAddInputE.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _kvBtnEditInputE.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             _kvBtnDeleteInputE.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            _kvBtnCloneInputE.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 
             _tabErogatore.Controls.Add(_kvBtnAddInputE);
             _tabErogatore.Controls.Add(_kvBtnEditInputE);
             _tabErogatore.Controls.Add(_kvBtnDeleteInputE);
+            _tabErogatore.Controls.Add(_kvBtnCloneInputE);
 
             _txtInputE.Visible = false;
-
-            _btnChiamaE.Location = new Point(10, 450);
-            _btnDebugSoapE.Location = new Point(178, 450);        
-            _txtOutputE.Location = new Point(10, 520);
-            _txtOutputE.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             _tabErogatore.Resize -= TabErogatore_Resize;
             _tabErogatore.Resize += TabErogatore_Resize;
@@ -114,23 +112,25 @@ namespace ricetta_dematerializzata_test_ui
 
         private void ApplyPrescrittoreLayout()
         {
-            if (_kvLvInputP == null || _kvBtnAddInputP == null || _kvBtnEditInputP == null || _kvBtnDeleteInputP == null) return;
+            if (_kvTreeInputP == null || _kvBtnAddInputP == null || _kvBtnEditInputP == null || _kvBtnDeleteInputP == null || _kvBtnCloneInputP == null) return;
 
             var rightButtonWidth = 155;
             var margin = 10;
-            var topInput = 158;
-            var listHeight = 280;
+            var topInput = 188;
+            var listHeight = 360;
 
-            _kvLvInputP.Location = new Point(margin, topInput);
-            _kvLvInputP.Size = new Size(Math.Max(300, _tabPrescrittore.ClientSize.Width - (margin * 3) - rightButtonWidth), listHeight);
+            _kvTreeInputP.Location = new Point(margin, topInput);
+            _kvTreeInputP.Size = new Size(Math.Max(300, _tabPrescrittore.ClientSize.Width - (margin * 3) - rightButtonWidth), listHeight);
 
             var btnX = _tabPrescrittore.ClientSize.Width - margin - rightButtonWidth;
             _kvBtnAddInputP.Location = new Point(btnX, topInput);
             _kvBtnEditInputP.Location = new Point(btnX, topInput + 36);
             _kvBtnDeleteInputP.Location = new Point(btnX, topInput + 72);
+            _kvBtnCloneInputP.Location = new Point(btnX, topInput + 108);
 
             _btnChiamaP.Location = new Point(margin, topInput + listHeight + 12);
-            _btnDebugSoapP.Location = new Point(178, topInput + listHeight + 12);           
+            _btnDebugSoapP.Location = new Point(178, topInput + listHeight + 12);
+            _txtOutputP.Location = new Point(margin, _btnChiamaP.Bottom + 8);
             _txtOutputP.Size = new Size(
                 Math.Max(300, _tabPrescrittore.ClientSize.Width - (margin * 2)),
                 Math.Max(100, _tabPrescrittore.ClientSize.Height - _txtOutputP.Top - margin));
@@ -138,45 +138,43 @@ namespace ricetta_dematerializzata_test_ui
 
         private void ApplyErogatoreLayout()
         {
-            if (_kvLvInputE == null || _kvBtnAddInputE == null || _kvBtnEditInputE == null || _kvBtnDeleteInputE == null) return;
+            if (_kvTreeInputE == null || _kvBtnAddInputE == null || _kvBtnEditInputE == null || _kvBtnDeleteInputE == null || _kvBtnCloneInputE == null) return;
 
             var rightButtonWidth = 155;
             var margin = 10;
-            var topInput = 158;
-            var listHeight = 280;
+            var topInput = 188;
+            var listHeight = 360;
 
-            _kvLvInputE.Location = new Point(margin, topInput);
-            _kvLvInputE.Size = new Size(Math.Max(300, _tabErogatore.ClientSize.Width - (margin * 3) - rightButtonWidth), listHeight);
+            _kvTreeInputE.Location = new Point(margin, topInput);
+            _kvTreeInputE.Size = new Size(Math.Max(300, _tabErogatore.ClientSize.Width - (margin * 3) - rightButtonWidth), listHeight);
 
             var btnX = _tabErogatore.ClientSize.Width - margin - rightButtonWidth;
             _kvBtnAddInputE.Location = new Point(btnX, topInput);
             _kvBtnEditInputE.Location = new Point(btnX, topInput + 36);
             _kvBtnDeleteInputE.Location = new Point(btnX, topInput + 72);
+            _kvBtnCloneInputE.Location = new Point(btnX, topInput + 108);
 
             _btnChiamaE.Location = new Point(margin, topInput + listHeight + 12);
-            _btnDebugSoapE.Location = new Point(178, topInput + listHeight + 12);          
-            _txtOutputE.Location = new Point(margin, _btnDebugSoapE.Bottom + 2);
+            _btnDebugSoapE.Location = new Point(178, topInput + listHeight + 12);
+            _txtOutputE.Location = new Point(margin, _btnChiamaE.Bottom + 8);
             _txtOutputE.Size = new Size(
                 Math.Max(300, _tabErogatore.ClientSize.Width - (margin * 2)),
                 Math.Max(100, _tabErogatore.ClientSize.Height - _txtOutputE.Top - margin));
         }
 
-        private static ListView CreateListView()
+        private static TreeView CreateTreeView()
         {
-            var lv = new ListView
+            var tv = new TreeView
             {
-                Size = new Size(840, 280),
-                View = View.Details,
+                Size = new Size(840, 300),
+                HideSelection = false,
                 FullRowSelect = true,
-                GridLines = true,
-                MultiSelect = false,
-                HideSelection = false
+                ShowLines = true,
+                ShowRootLines = true,
+                ShowPlusMinus = true
             };
 
-            lv.Columns.Add("Chiave", 260);
-            lv.Columns.Add("Valore", 560);
-
-            return lv;
+            return tv;
         }
 
         private static Button CreateSideButton(string text, Point location, EventHandler onClick)
@@ -191,118 +189,311 @@ namespace ricetta_dematerializzata_test_ui
             return btn;
         }
 
-        private static void LoadListFromInput(TextBox source, ListView list)
+        private static void LoadTreeFromInput(TextBox source, TreeView tree)
         {
-            list.BeginUpdate();
+            tree.BeginUpdate();
             try
             {
-                list.Items.Clear();
+                tree.Nodes.Clear();
                 var dict = ParserKV.Parse(source.Text);
+
+                var roots = new Dictionary<string, TreeNode>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var kv in dict)
                 {
-                    var item = new ListViewItem(kv.Key);
-                    item.SubItems.Add(kv.Value);
-                    list.Items.Add(item);
+                    var key = kv.Key;
+                    var value = kv.Value;
+
+                    if (string.IsNullOrWhiteSpace(key))
+                        continue;
+
+                    if (string.Equals(value, "ARRAY", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (!roots.TryGetValue(key, out var root))
+                        {
+                            root = new TreeNode(key) { Tag = new NodeInfo(key, "ARRAY", true, null) };
+                            roots[key] = root;
+                            tree.Nodes.Add(root);
+                        }
+                        else
+                        {
+                            root.Tag = new NodeInfo(key, "ARRAY", true, null);
+                        }
+                        continue;
+                    }
+
+                    if (TryParseArrayChildKey(key, out var parent, out var index, out var childKey))
+                    {
+                        if (!roots.TryGetValue(parent, out var root))
+                        {
+                            root = new TreeNode(parent) { Tag = new NodeInfo(parent, "ARRAY", true, null) };
+                            roots[parent] = root;
+                            tree.Nodes.Add(root);
+                        }
+
+                        var idxText = $"[{index}]";
+                        var idxNode = root.Nodes.Cast<TreeNode>().FirstOrDefault(n => string.Equals(n.Text, idxText, StringComparison.OrdinalIgnoreCase));
+                        if (idxNode == null)
+                        {
+                            idxNode = new TreeNode(idxText) { Tag = index };
+                            root.Nodes.Add(idxNode);
+                        }
+
+                        var child = new TreeNode($"{childKey} = {value}") { Tag = new NodeInfo(childKey, value, false, parent) };
+                        idxNode.Nodes.Add(child);
+                    }
+                    else
+                    {
+                        var node = new TreeNode($"{key} = {value}") { Tag = new NodeInfo(key, value, false, null) };
+                        tree.Nodes.Add(node);
+                    }
                 }
+
+                tree.CollapseAll();
             }
             finally
             {
-                list.EndUpdate();
+                tree.EndUpdate();
             }
         }
 
-        private static void SaveListToInput(ListView list, TextBox target)
+        private static void SaveTreeToInput(TreeView tree, TextBox target)
         {
             var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            foreach (ListViewItem item in list.Items)
-            {
-                var key = item.Text?.Trim() ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(key)) continue;
 
-                var value = item.SubItems.Count > 1 ? item.SubItems[1].Text : string.Empty;
-                dict[key] = value ?? string.Empty;
+            foreach (TreeNode node in tree.Nodes)
+            {
+                if (node.Tag is not NodeInfo info)
+                    continue;
+
+                if (info.IsArray)
+                {
+                    dict[info.Key] = "ARRAY";
+
+                    foreach (TreeNode idxNode in node.Nodes)
+                    {
+                        if (idxNode.Tag is not int idx)
+                            continue;
+
+                        foreach (TreeNode childNode in idxNode.Nodes)
+                        {
+                            if (childNode.Tag is not NodeInfo childInfo)
+                                continue;
+
+                            var fullKey = $"{info.Key}_{idx}_{childInfo.Key}";
+                            dict[fullKey] = childInfo.Value ?? string.Empty;
+                        }
+                    }
+                }
+                else
+                {
+                    dict[info.Key] = info.Value ?? string.Empty;
+                }
             }
 
             target.Text = ParserKV.Build(dict);
         }
 
         private void BtnAddInputP_Click(object? sender, EventArgs e)
-            => AddOrEditItem(_kvLvInputP!, _txtInputP, null);
+            => AddOrEditNode(_kvTreeInputP!, _txtInputP, null);
 
         private void BtnEditInputP_Click(object? sender, EventArgs e)
-            => EditSelectedItem(_kvLvInputP!, _txtInputP);
+            => EditSelectedNode(_kvTreeInputP!, _txtInputP);
 
         private void BtnDeleteInputP_Click(object? sender, EventArgs e)
-            => DeleteSelectedItem(_kvLvInputP!, _txtInputP);
+            => DeleteSelectedNode(_kvTreeInputP!, _txtInputP);
+
+        private void BtnCloneInputP_Click(object? sender, EventArgs e)
+            => CloneSelectedNode(_kvTreeInputP!, _txtInputP);
 
         private void BtnAddInputE_Click(object? sender, EventArgs e)
-            => AddOrEditItem(_kvLvInputE!, _txtInputE, null);
+            => AddOrEditNode(_kvTreeInputE!, _txtInputE, null);
 
         private void BtnEditInputE_Click(object? sender, EventArgs e)
-            => EditSelectedItem(_kvLvInputE!, _txtInputE);
+            => EditSelectedNode(_kvTreeInputE!, _txtInputE);
 
         private void BtnDeleteInputE_Click(object? sender, EventArgs e)
-            => DeleteSelectedItem(_kvLvInputE!, _txtInputE);
+            => DeleteSelectedNode(_kvTreeInputE!, _txtInputE);
 
-        private void EditSelectedItem(ListView list, TextBox target)
+        private void BtnCloneInputE_Click(object? sender, EventArgs e)
+            => CloneSelectedNode(_kvTreeInputE!, _txtInputE);
+
+        private void EditSelectedNode(TreeView tree, TextBox target)
         {
-            if (list.SelectedItems.Count == 0)
+            if (tree.SelectedNode == null)
             {
-                MessageBox.Show("Seleziona una riga da modificare.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Seleziona un nodo da modificare.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            AddOrEditItem(list, target, list.SelectedItems[0]);
+            AddOrEditNode(tree, target, tree.SelectedNode);
         }
 
-        private void DeleteSelectedItem(ListView list, TextBox target)
+        private void DeleteSelectedNode(TreeView tree, TextBox target)
         {
-            if (list.SelectedItems.Count == 0)
+            if (tree.SelectedNode == null)
             {
-                MessageBox.Show("Seleziona una riga da eliminare.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Seleziona un nodo da eliminare.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            list.Items.Remove(list.SelectedItems[0]);
-            SaveListToInput(list, target);
+            if (tree.SelectedNode.Parent == null)
+            {
+                tree.Nodes.Remove(tree.SelectedNode);
+            }
+            else if (tree.SelectedNode.Parent.Tag is int)
+            {
+                tree.SelectedNode.Parent.Nodes.Remove(tree.SelectedNode);
+                if (tree.SelectedNode.Parent.Nodes.Count == 0)
+                    tree.SelectedNode.Parent.Parent?.Nodes.Remove(tree.SelectedNode.Parent);
+            }
+            else
+            {
+                tree.SelectedNode.Parent.Nodes.Remove(tree.SelectedNode);
+            }
+
+            SaveTreeToInput(tree, target);
         }
 
-        private void AddOrEditItem(ListView list, TextBox target, ListViewItem? existing)
+        private void CloneSelectedNode(TreeView tree, TextBox target)
         {
-            var currentKey = existing?.Text ?? string.Empty;
-            var currentValue = existing != null && existing.SubItems.Count > 1 ? existing.SubItems[1].Text : string.Empty;
+            if (tree.SelectedNode == null)
+            {
+                MessageBox.Show("Seleziona un nodo da clonare.", "Attenzione", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
+            var selected = tree.SelectedNode;
+
+            // Clona un nodo indice [n] dentro lo stesso array con indice incrementale
+            if (selected.Tag is int)
+            {
+                var arrayRoot = selected.Parent;
+                if (arrayRoot?.Tag is NodeInfo arrayInfo && arrayInfo.IsArray)
+                {
+                    var nextIdx = GetNextArrayIndex(arrayRoot);
+                    var newIdxNode = new TreeNode($"[{nextIdx}]") { Tag = nextIdx };
+
+                    foreach (TreeNode child in selected.Nodes)
+                    {
+                        if (child.Tag is NodeInfo childInfo)
+                        {
+                            var childClone = new TreeNode($"{childInfo.Key} = {childInfo.Value}")
+                            {
+                                Tag = new NodeInfo(childInfo.Key, childInfo.Value, false, arrayInfo.Key)
+                            };
+                            newIdxNode.Nodes.Add(childClone);
+                        }
+                    }
+
+                    arrayRoot.Nodes.Add(newIdxNode);
+                    arrayRoot.Expand();
+                    newIdxNode.Expand();
+                    tree.SelectedNode = newIdxNode;
+                    SaveTreeToInput(tree, target);
+                }
+                return;
+            }
+
+            if (selected.Tag is NodeInfo info && !info.IsArray)
+            {
+                var newKey = GenerateUniqueRootKey(tree, info.Key);
+                var clone = new TreeNode($"{newKey} = {info.Value}") { Tag = new NodeInfo(newKey, info.Value, false, null) };
+                tree.Nodes.Add(clone);
+                tree.SelectedNode = clone;
+                SaveTreeToInput(tree, target);
+                return;
+            }
+
+            TreeNode rootArray = selected;
+            if (selected.Parent != null && selected.Parent.Tag is int)
+                rootArray = selected.Parent.Parent!;
+            else if (selected.Parent != null)
+                rootArray = selected.Parent;
+
+            if (rootArray.Tag is not NodeInfo arrayInfo2 || !arrayInfo2.IsArray)
+                return;
+
+            var clonedRoot = DeepCloneArrayRoot(tree, rootArray, arrayInfo2.Key);
+            tree.Nodes.Add(clonedRoot);
+            tree.SelectedNode = clonedRoot;
+            clonedRoot.ExpandAll();
+            SaveTreeToInput(tree, target);
+        }
+
+        private void AddOrEditNode(TreeView tree, TextBox target, TreeNode? existing)
+        {
+            var currentKey = string.Empty;
+            var currentValue = string.Empty;
             var currentChildren = new List<KeyValuePair<string, string>>();
-            if (!string.IsNullOrWhiteSpace(currentKey) && IsArrayParentKey(currentKey))
-                currentChildren = ExtractChildren(list, currentKey);
+
+            if (existing != null)
+            {
+                if (existing.Tag is NodeInfo ni)
+                {
+                    currentKey = ni.Key;
+                    currentValue = ni.Value;
+
+                    if (ni.IsArray)
+                        currentChildren = ExtractChildrenFromTree(existing);
+                }
+                else if (existing.Parent != null && existing.Parent.Tag is int && existing.Tag is NodeInfo childInfo)
+                {
+                    currentKey = childInfo.Key;
+                    currentValue = childInfo.Value;
+                    var arrayRoot = existing.Parent.Parent;
+                    if (arrayRoot?.Tag is NodeInfo rootInfo)
+                        currentKey = rootInfo.Key;
+                }
+            }
 
             if (!TryShowKeyValueDialog(currentKey, currentValue, currentChildren, out var key, out var value, out var children))
                 return;
 
-            var oldParentKey = existing?.Text;
-            if (!string.IsNullOrWhiteSpace(oldParentKey))
-                RemoveChildren(list, oldParentKey);
-
-            ListViewItem parentItem;
             if (existing == null)
             {
-                parentItem = new ListViewItem(key);
-                parentItem.SubItems.Add(value);
-                list.Items.Add(parentItem);
+                if (string.Equals(value, "ARRAY", StringComparison.OrdinalIgnoreCase))
+                {
+                    var root = BuildArrayRootNode(key, children);
+                    tree.Nodes.Add(root);
+                    tree.SelectedNode = root;
+                }
+                else
+                {
+                    var node = new TreeNode($"{key} = {value}") { Tag = new NodeInfo(key, value, false, null) };
+                    tree.Nodes.Add(node);
+                    tree.SelectedNode = node;
+                }
+
+                SaveTreeToInput(tree, target);
+                return;
             }
-            else
+
+            if (existing.Tag is NodeInfo existingInfo && existingInfo.IsArray)
             {
-                parentItem = existing;
-                parentItem.Text = key;
-                if (parentItem.SubItems.Count > 1) parentItem.SubItems[1].Text = value;
-                else parentItem.SubItems.Add(value);
+                var newRoot = BuildArrayRootNode(key, children);
+                var index = tree.Nodes.IndexOf(existing);
+                tree.Nodes.Remove(existing);
+                tree.Nodes.Insert(index, newRoot);
+                tree.SelectedNode = newRoot;
+            }
+            else if (existing.Tag is NodeInfo)
+            {
+                existing.Text = $"{key} = {value}";
+                existing.Tag = new NodeInfo(key, value, false, null);
+                tree.SelectedNode = existing;
+            }
+            else if (existing.Parent != null && existing.Parent.Tag is int)
+            {
+                // modifica nodo figlio
+                var parentIndexNode = existing.Parent;
+                existing.Text = $"{key} = {value}";
+                var arrayRootKey = parentIndexNode.Parent?.Tag is NodeInfo ari ? ari.Key : null;
+                existing.Tag = new NodeInfo(key, value, false, arrayRootKey);
+                tree.SelectedNode = existing;
             }
 
-            if (children.Count > 0)
-                UpsertChildren(list, key, children);
-
-            SaveListToInput(list, target);
+            SaveTreeToInput(tree, target);
         }
 
         private bool TryShowKeyValueDialog(
@@ -581,72 +772,146 @@ namespace ricetta_dematerializzata_test_ui
             => string.Equals(key, "ElencoDettagliPrescrizioni", StringComparison.OrdinalIgnoreCase)
             || string.Equals(key, "ElencoDettagliPrescrInviiErogato", StringComparison.OrdinalIgnoreCase);
 
-        private static List<KeyValuePair<string, string>> ExtractChildren(ListView list, string parentKey)
+        private static bool TryParseArrayChildKey(string key, out string parent, out int index, out string childKey)
         {
-            var prefix = parentKey + "_";
-            var children = new List<KeyValuePair<string, string>>();
+            parent = string.Empty;
+            childKey = string.Empty;
+            index = 0;
 
-            foreach (ListViewItem item in list.Items)
-            {
-                var key = item.Text ?? string.Empty;
-                if (!key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) continue;
+            if (string.IsNullOrWhiteSpace(key))
+                return false;
 
-                var childName = key.Substring(prefix.Length);
-                var value = item.SubItems.Count > 1 ? item.SubItems[1].Text : string.Empty;
-                children.Add(new KeyValuePair<string, string>(childName, value));
-            }
+            var parts = key.Split('_');
+            if (parts.Length < 3)
+                return false;
 
-            return children;
+            if (!int.TryParse(parts[parts.Length - 2], out index))
+                return false;
+
+            parent = string.Join("_", parts.Take(parts.Length - 2));
+            childKey = parts[parts.Length - 1];
+            return !string.IsNullOrWhiteSpace(parent) && !string.IsNullOrWhiteSpace(childKey);
         }
 
-        private static void RemoveChildren(ListView list, string parentKey)
+        private static List<KeyValuePair<string, string>> ExtractChildrenFromTree(TreeNode root)
         {
-            var prefix = parentKey + "_";
-            var toDelete = new List<ListViewItem>();
+            var result = new List<KeyValuePair<string, string>>();
 
-            foreach (ListViewItem item in list.Items)
+            foreach (TreeNode idxNode in root.Nodes)
             {
-                var key = item.Text ?? string.Empty;
-                if (key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    toDelete.Add(item);
-            }
+                if (idxNode.Tag is not int idx)
+                    continue;
 
-            foreach (var item in toDelete)
-                list.Items.Remove(item);
-        }
-
-        private static void UpsertChildren(ListView list, string parentKey, List<KeyValuePair<string, string>> children)
-        {
-            var grouped = children
-                .Where(c => !string.IsNullOrWhiteSpace(c.Key))
-                .GroupBy(c => c.Key.Trim(), StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(g => g.Key, g => g.Last().Value, StringComparer.OrdinalIgnoreCase);
-
-            foreach (var kv in grouped)
-            {
-                var fullKey = parentKey + "_" + kv.Key;
-                ListViewItem? existing = null;
-
-                foreach (ListViewItem item in list.Items)
+                foreach (TreeNode childNode in idxNode.Nodes)
                 {
-                    if (string.Equals(item.Text, fullKey, StringComparison.OrdinalIgnoreCase))
+                    if (childNode.Tag is not NodeInfo child)
+                        continue;
+
+                    result.Add(new KeyValuePair<string, string>($"{idx}_{child.Key}", child.Value));
+                }
+            }
+
+            return result;
+        }
+
+        private static TreeNode BuildArrayRootNode(string key, List<KeyValuePair<string, string>> children)
+        {
+            var root = new TreeNode(key) { Tag = new NodeInfo(key, "ARRAY", true, null) };
+
+            var byIndex = new Dictionary<int, List<KeyValuePair<string, string>>>();
+            foreach (var child in children)
+            {
+                if (string.IsNullOrWhiteSpace(child.Key)) continue;
+
+                var idx = 1;
+                var nodeKey = child.Key;
+                var sep = child.Key.IndexOf('_');
+                if (sep > 0 && int.TryParse(child.Key.Substring(0, sep), out var parsedIdx))
+                {
+                    idx = parsedIdx;
+                    nodeKey = child.Key.Substring(sep + 1);
+                }
+
+                if (!byIndex.TryGetValue(idx, out var list))
+                {
+                    list = new List<KeyValuePair<string, string>>();
+                    byIndex[idx] = list;
+                }
+                list.Add(new KeyValuePair<string, string>(nodeKey, child.Value));
+            }
+
+            foreach (var kv in byIndex.OrderBy(k => k.Key))
+            {
+                var idxNode = new TreeNode($"[{kv.Key}]") { Tag = kv.Key };
+                foreach (var child in kv.Value)
+                {
+                    var c = new TreeNode($"{child.Key} = {child.Value}") { Tag = new NodeInfo(child.Key, child.Value, false, key) };
+                    idxNode.Nodes.Add(c);
+                }
+                root.Nodes.Add(idxNode);
+            }
+
+            return root;
+        }
+
+        private static string GenerateUniqueRootKey(TreeView tree, string baseKey)
+        {
+            var key = baseKey + "_copy";
+            var i = 2;
+            while (tree.Nodes.Cast<TreeNode>().Any(n => n.Tag is NodeInfo ni && string.Equals(ni.Key, key, StringComparison.OrdinalIgnoreCase)))
+            {
+                key = baseKey + "_copy" + i;
+                i++;
+            }
+            return key;
+        }
+
+        private static TreeNode DeepCloneArrayRoot(TreeView tree, TreeNode rootArray, string baseKey)
+        {
+            var newKey = GenerateUniqueRootKey(tree, baseKey);
+            var clone = new TreeNode(newKey) { Tag = new NodeInfo(newKey, "ARRAY", true, null) };
+
+            foreach (TreeNode idxNode in rootArray.Nodes)
+            {
+                var newIdx = new TreeNode(idxNode.Text) { Tag = idxNode.Tag };
+                foreach (TreeNode child in idxNode.Nodes)
+                {
+                    if (child.Tag is NodeInfo childInfo)
                     {
-                        existing = item;
-                        break;
+                        var childClone = new TreeNode(child.Text) { Tag = new NodeInfo(childInfo.Key, childInfo.Value, false, newKey) };
+                        newIdx.Nodes.Add(childClone);
                     }
                 }
+                clone.Nodes.Add(newIdx);
+            }
 
-                if (existing == null)
-                {
-                    var item = new ListViewItem(fullKey);
-                    item.SubItems.Add(kv.Value);
-                    list.Items.Add(item);
-                }
-                else
-                {
-                    if (existing.SubItems.Count > 1) existing.SubItems[1].Text = kv.Value;
-                    else existing.SubItems.Add(kv.Value);
-                }
+            return clone;
+        }
+
+        private static int GetNextArrayIndex(TreeNode arrayRoot)
+        {
+            var max = 0;
+            foreach (TreeNode idxNode in arrayRoot.Nodes)
+            {
+                if (idxNode.Tag is int idx && idx > max)
+                    max = idx;
+            }
+            return max + 1;
+        }
+
+        private sealed class NodeInfo
+        {
+            public string Key { get; }
+            public string Value { get; }
+            public bool IsArray { get; }
+            public string? ParentArrayKey { get; }
+
+            public NodeInfo(string key, string value, bool isArray, string? parentArrayKey)
+            {
+                Key = key;
+                Value = value;
+                IsArray = isArray;
+                ParentArrayKey = parentArrayKey;
             }
         }
     }

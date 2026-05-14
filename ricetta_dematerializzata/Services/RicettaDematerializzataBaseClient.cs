@@ -58,7 +58,7 @@ namespace ricetta_dematerializzata.Services
         /// <param name="username">Username autenticazione Basic</param>
         /// <param name="password">Password autenticazione Basic</param>
         /// <param name="ambiente">0=Test, 1=Produzione</param>
-        [Obsolete("Usare ConfiguraUnificata() con (username, password, seriale) invece.", false)]
+        [Obsolete("Usare Configura(username, password, seriale, ambiente, logLevel) invece.", false)]
         public void Configura(string username, string password, int ambiente = 0)
         {
             _config = new ServiceConfiguration
@@ -72,7 +72,7 @@ namespace ricetta_dematerializzata.Services
         }
 
         /// <summary>
-        /// Configura il client con username, password e seriale certificato.
+        /// Configura il client con username, password, seriale certificato, ambiente e livello di log.
         /// Questo è il metodo di configurazione principale.
         /// Il certificato SSL verrà usato automaticamente per i servizi che lo richiedono (prescrittore/erogatore),
         /// mentre i servizi di gestione token (Create/Revoke/CheckToken) useranno sempre Basic Auth.
@@ -81,7 +81,8 @@ namespace ricetta_dematerializzata.Services
         /// <param name="password">Password per autenticazione Basic</param>
         /// <param name="seriale">Seriale del certificato client nel Windows Certificate Store (LOCAL_MACHINE\Personal)</param>
         /// <param name="ambiente">0=Test, 1=Produzione</param>
-        public void Configura(string username, string password, string seriale, int ambiente = 0)
+        /// <param name="logLevel">Livello minimo log: Verbose|Debug|Information|Warning|Error|Fatal (default Error)</param>
+        public void Configura(string username, string password, string seriale = "", int ambiente = 0, string logLevel = "Error")
         {
             _config = new ServiceConfiguration
             {
@@ -92,10 +93,12 @@ namespace ricetta_dematerializzata.Services
             };
             _httpClient = new SoapHttpClient(
                 username, password, seriale, _config.RisolviPathCertificatoCA(), _config.IgnoraErroriSsl, (ServiceEnvironment)ambiente);
+
+            RicettaLogger.ConfiguraLivello(logLevel);
         }
 
         /// <summary>
-        /// Metodo precedente mantenuto per compatibilità. Usare Configura() preferibilmente.
+        /// Metodo precedente mantenuto per compatibilità. Usare Configura(..., logLevel) preferibilmente.
         /// </summary>
         /// <param name="username">Username autenticazione Basic</param>
         /// <param name="password">Password autenticazione Basic</param>
@@ -166,6 +169,10 @@ namespace ricetta_dematerializzata.Services
                 }
             }
 
+            var servizioName  = servizio.ToString();
+            var applicazione  = IsServizioErogatore(servizio) ? "EROGATORE" : "PRESCRITTORE";
+            var ambienteStr   = _config?.Ambiente.ToString() ?? "N/D";
+
             try
             {
                 ValidaConfigurazione();
@@ -180,6 +187,11 @@ namespace ricetta_dematerializzata.Services
 
                 // 2. Cifratura automatica CF e pincode
                 CifraParametriSensibili(dictCanonico);
+
+                // ── Log chiamata (camelCase + MAIUSCOLO) ─────────────────────────────
+                var inputCamel = ParserKV.Build(dictCanonico);
+                var inputUpper = inputCamel.ToUpperInvariant();
+                RicettaLogger.LogChiamata(servizioName, applicazione, ambienteStr, inputCamel, inputUpper);
 
                 // 3. Recupera info endpoint
                 var endpoint      = ServicesCatalog.Ottieni(servizio);
@@ -199,15 +211,25 @@ namespace ricetta_dematerializzata.Services
                     namespaceTipiDati);
 
                 // 5. Chiamata HTTP con Authorization2F
+                var sw = System.Diagnostics.Stopwatch.StartNew();
                 var authorization2F = CreaAuthorization2F(servizio);
                 var xmlRisposta = httpClient.ChiamaServizio(url, soapAction, envelope, authorization2F, endpoint.UsaSslClientCert, endpoint.UsaValidazioneCA);
+                sw.Stop();
 
                 // 6. Parse risposta
                 var dictOutput = SoapHelper.ParseSoapResponse(xmlRisposta);
-                return ParserKV.Build(dictOutput);
+                var outputKv   = ParserKV.Build(dictOutput);
+
+                // ── Log risposta (camelCase + MAIUSCOLO) ─────────────────────────────
+                RicettaLogger.LogRisposta(servizioName, applicazione, outputKv, outputKv.ToUpperInvariant(), sw.ElapsedMilliseconds);
+
+                return outputKv;
             }
             catch (Exception ex)
             {
+                var inputLog = string.Empty;
+                try { inputLog = parametriInput; } catch { }
+                RicettaLogger.LogErrore(servizioName, applicazione, ex, inputLog);
                 return ParserKV.BuildErrore(9999, $"Eccezione client: {ex.Message}");
             }
         }
@@ -459,14 +481,19 @@ namespace ricetta_dematerializzata.Services
                 return;
             }
 
-            if (!hasStrutturaValue)
-                throw new ArgumentException("In ambiente PRODUZIONE è obbligatorio il parametro 'codiceStruttura'.");
+            // PRODUZIONE: i due campi sono alternativi.
+            // Deve essercene esattamente uno valorizzato e l'altro non deve comparire (nemmeno vuoto).
+            if (hasSsaKey && hasStrutturaKey)
+                throw new ArgumentException("In ambiente PRODUZIONE 'codiceSsaErogatore' e 'codiceStruttura' sono alternativi esclusivi: inviare solo uno dei due, e non inviare l'altro (nemmeno vuoto).");
 
-            if (hasSsaKey)
-                throw new ArgumentException("In ambiente PRODUZIONE 'codiceSsaErogatore' non deve essere inviato quando è presente 'codiceStruttura' (nemmeno vuoto).");
+            if (hasSsaKey && !hasSsaValue)
+                throw new ArgumentException("In ambiente PRODUZIONE, se inviato, 'codiceSsaErogatore' deve essere valorizzato (non vuoto).");
 
-            if (hasSsaValue && hasStrutturaValue)
-                throw new ArgumentException("In ambiente PRODUZIONE 'codiceSsaErogatore' e 'codiceStruttura' sono alternativi: inviare solo 'codiceStruttura'.");
+            if (hasStrutturaKey && !hasStrutturaValue)
+                throw new ArgumentException("In ambiente PRODUZIONE, se inviato, 'codiceStruttura' deve essere valorizzato (non vuoto).");
+
+            if (!(hasSsaValue || hasStrutturaValue))
+                throw new ArgumentException("In ambiente PRODUZIONE è obbligatorio inviare uno tra 'codiceSsaErogatore' e 'codiceStruttura'.");
         }
 
         private static bool RichiedeIdentificativiErogatore(DigitalPrescriptionService servizio)

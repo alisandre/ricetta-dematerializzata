@@ -48,7 +48,7 @@ var client = new RicettaDematerializzataBaseClient(config);
 ```csharp
 // Oppure con metodo Configura() dopo istanziazione (es. uso COM)
 var client = new RicettaDematerializzataBaseClient();
-client.Configura("utente", "password", "F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D", ambiente: 1);
+client.Configura("utente", "password", "F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D", ambiente: 1, logLevel: "Error");
 string risultato = client.Chiama((int)DigitalPrescriptionService.InvioPrescritto, "...");
 ```
 
@@ -56,7 +56,7 @@ string risultato = client.Chiama((int)DigitalPrescriptionService.InvioPrescritto
 
 ```csharp
 var client = new RicettaDematerializzataBaseClient();
-client.Configura("utente", "password", seriale: "", ambiente: 0); // Test, Basic Auth only
+client.Configura("utente", "password", seriale: "", ambiente: 0, logLevel: "Information"); // Test, Basic Auth only
 ```
 
 ---
@@ -73,7 +73,7 @@ var
 begin
   client := TRicettaDematerializzataClient.Create;
   try
-    client.Configura('utente', 'password', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE);
+    client.Configura('utente', 'password', 'F0B8C2D1E5A3F9B6C2D1E5A3F9B6C2D', AMB_PRODUZIONE, 'Error');
     ShowMessage(client.Chiama(SRV_INVIO_PRESCRITTO, 'NRE=123456789;...'));
   finally
     client.Free;
@@ -84,10 +84,16 @@ end;
 ### Senza certificato (solo Basic Auth, test)
 
 ```pascal
-client.Configura('utente', 'password', '', AMB_TEST);
+client.Configura('utente', 'password', '', AMB_TEST, 'Information');
 ```
 
 ---
+
+## Livello di log configurabile
+
+`Configura(...)` accetta il parametro opzionale `logLevel`.
+Valori supportati (case-insensitive): `Verbose`, `Debug`, `Information`, `Warning`, `Error`, `Fatal`.
+Default: `Error`.
 
 ## Come trovare il seriale nel Windows Certificate Store
 
